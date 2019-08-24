@@ -1,0 +1,22 @@
+version: 1.0.{build}
+
+build:
+  verbosity: minimal
+
+image:
+  - Visual Studio 2013
+  - Visual Studio 2015
+  - Visual Studio 2017
+
+before_build:
+  - cmake --help
+
+build_script:
+  - cmake .
+  - cmake --build . --target runtest
+
+before_test:
+  - dir
+# TODO figure out whether \ needs to be escaped here (should work regardless)
+test_script:
+  - .\\runtest
