@@ -6,7 +6,7 @@ project(escape-utf8)
 set(CMAKE_CXX_STANDARD 14)
 set(CXX_STANDARD_REQUIRED on)
 
-SET(CMAKE_CXX_FLAGS "-Wall -Wextra -O3")
+#SET(CMAKE_CXX_FLAGS "-Wall -Wextra -O3")
 
 add_executable(escape src/main.cpp)
 
