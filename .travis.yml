@@ -32,6 +32,7 @@ matrix:
         homebrew:
           packages:
             -gcc5
+          update: true
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
     - name: "Clang on macOS 10.12"
@@ -41,8 +42,13 @@ matrix:
     - name: "GCC 7 on macOS 10.14"
       os: osx
       osx_image: xcode11
+      addons:
+        homebrew:
+          packages:
+            -gcc@7
+          update: true
       env:
-        - MATRIX_EVAL="brew install gcc7 && CC=gcc-7 && CXX=g++-7"
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
     - name: "Clang on macOS 10.14"
       os: osx
       osx_image: xcode11
