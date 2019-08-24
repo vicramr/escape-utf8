@@ -31,7 +31,7 @@ matrix:
       addons:
         homebrew:
           packages:
-            -gcc5
+            - gcc5
           update: true
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
@@ -45,7 +45,7 @@ matrix:
       addons:
         homebrew:
           packages:
-            -gcc@7
+            - gcc@7
           update: true
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
