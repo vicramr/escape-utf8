@@ -11,9 +11,9 @@ image:
 
 environment:
   matrix:
-    - GENERATOR: "Visual Studio 12 2013"
-    - GENERATOR: "Visual Studio 14 2015"
-    - GENERATOR: "Visual Studio 15 2017"
+    - GENERATOR: ""Visual Studio 12 2013""
+    - GENERATOR: ""Visual Studio 14 2015""
+    - GENERATOR: ""Visual Studio 15 2017""
 
 build_script:
   - mkdir build
