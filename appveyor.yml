@@ -15,14 +15,15 @@ environment:
     - GENERATOR: "Visual Studio 14 2015"
     - GENERATOR: "Visual Studio 15 2017"
 
+# Note: was having issues with cmd not properly passing the quoted variable
+# to cmake, so I switched to powershell. Judging from googletest's appveyor.yml,
+# it seems that this should work: https://github.com/google/googletest/blob/master/appveyor.yml
+# -Vicram
 build_script:
-  - mkdir build
-  - cd build
-  - cmake -G \"%GENERATOR%\" ..
-  - cmake --build . --target runtest
-
-before_test:
-  - dir
+  - ps: md build
+  - ps: cd build
+  - ps: cmake -G "$env:GENERATOR" ..
+  - ps: cmake --build . --target runtest
 
 test_script:
-  - .\Debug\runtest.exe
+  - ps: .\Debug\runtest.exe
