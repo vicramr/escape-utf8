@@ -8,15 +8,21 @@ image:
   - Visual Studio 2015
   - Visual Studio 2017
 
-before_build:
-  - cmake --help
+
+environment:
+  matrix:
+    - GENERATOR: "Visual Studio 12 2013"
+    - GENERATOR: "Visual Studio 14 2015"
+    - GENERATOR: "Visual Studio 15 2017"
 
 build_script:
-  - cmake .
+  - mkdir build
+  - cd build
+  - cmake -G %GENERATOR% ..
   - cmake --build . --target runtest
 
 before_test:
   - dir
-# TODO figure out whether \ needs to be escaped here (should work regardless)
+
 test_script:
-  - .\\runtest
+  - .\Debug\runtest.exe
