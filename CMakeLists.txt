@@ -20,7 +20,7 @@ endif()
 # Some inspiration taken from this SO post: https://stackoverflow.com/q/45955272
 # and from this CMakeLists.txt file: https://github.com/leela-zero/leela-zero/blob/next/CMakeLists.txt
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wall")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
     # Don't need to add any flags for debug. Optimizations are turned off by default: https://docs.microsoft.com/en-us/cpp/build/reference/od-disable-debug?view=vs-2019
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /GL /Gw") # These flags all turn on optimizations.
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
@@ -36,4 +36,3 @@ add_executable(escape src/main.cpp)
 
 # Here I'm just treating the test as another target.
 add_executable(runtest test/test.cpp)
-

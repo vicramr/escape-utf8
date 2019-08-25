@@ -3,17 +3,30 @@ version: 1.0.{build}
 build:
   verbosity: minimal
 
-image:
-  - Visual Studio 2013
-  - Visual Studio 2015
-  - Visual Studio 2017
-
-
+# Instead of specifying image at the top level, we use the APPVEYOR_BUILD_WORKER_IMAGE
+# environment variable: https://www.appveyor.com/docs/build-environment/#using-multiple-images-for-the-same-build
 environment:
   matrix:
-    - GENERATOR: "Visual Studio 12 2013"
-    - GENERATOR: "Visual Studio 14 2015"
-    - GENERATOR: "Visual Studio 15 2017"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
+      GENERATOR: "Visual Studio 12 2013"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      GENERATOR: "Visual Studio 12 2013"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      GENERATOR: "Visual Studio 14 2015"
+#    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+#      GENERATOR: "Visual Studio 12 2013"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      GENERATOR: "Visual Studio 14 2015"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      GENERATOR: "Visual Studio 15 2017"
+#    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
+#      GENERATOR: "MinGW Makefiles"
+#    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+#      GENERATOR: "MinGW Makefiles"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      GENERATOR: "MinGW Makefiles"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      GENERATOR: "MSYS Makefiles"
 
 # Note: was having issues with cmd not properly passing the quoted variable
 # to cmake, so I switched to powershell. Judging from googletest's appveyor.yml,
