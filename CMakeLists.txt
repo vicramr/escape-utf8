@@ -32,7 +32,7 @@ else()
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
 endif()
 
-add_executable(escape src/main.cpp)
+add_executable(escape src/main.cpp src/parseargs.cpp)
 
 # Here I'm just treating the test as another target.
 add_executable(runtest test/test.cpp)
