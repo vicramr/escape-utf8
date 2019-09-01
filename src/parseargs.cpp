@@ -48,6 +48,11 @@ static std::string const helpmsg(
 "                                    does exist, it will be overwritten.\n"
 );
 
+/*
+ * Defined these as std::strings so that I could easily do something like
+ * argv[1] == dash_o` and get the overloaded operator== that compares
+ * char* to std::string.
+ */
 static std::string const dash_o("-o");
 static std::string const dash_dash_output("--output");
 static std::string const dash_h("-h");
@@ -59,8 +64,8 @@ std::bitset<3> parse_helper(int argc, char **argv, std::string& inputfile, std::
 bool strlen_atleast(const char *str, size_t len);
 int check_output_option(const char *arg);
 
-//std::pair<std::shared_ptr<std::istream>, std::shared_ptr<std::ostream>>
-void parse(int argc, char **argv) {
+
+StreamPair parse(int argc, char **argv) {
     /*
      * There are 4 potential invocations of this program: help, version,
      * neither (which is valid), and invalid.
@@ -85,7 +90,19 @@ void parse(int argc, char **argv) {
     }
     assert(bits[2]);
     // The only remaining case is the one where we can continue with the rest of the program.
-
+    if (inputfile.empty()) {
+        if (outputfile.empty()) {
+            return StreamPair(true, true);
+        } else {
+            return StreamPair(true, outputfile);
+        }
+    } else {
+        if (outputfile.empty()) {
+            return StreamPair(inputfile, true);
+        } else {
+            return StreamPair(inputfile, outputfile);
+        }
+    }
 }
 
 /**
@@ -225,6 +242,10 @@ int check_output_option(const char *arg) {
 
 /**
  * Returns whether the given null-terminated string has a length of at least len.
+ *
+ * This function will not read more than len characters from the string, so if
+ * the string's length is much larger than len, this function will be faster than
+ * using something like strlen().
  * @param str A null-terminated string.
  * @param len The desired length to check for.
  * @return True if there are at least len non-null characters in str, false otherwise.

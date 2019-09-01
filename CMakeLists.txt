@@ -23,16 +23,15 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
     # Don't need to add any flags for debug. Optimizations are turned off by default: https://docs.microsoft.com/en-us/cpp/build/reference/od-disable-debug?view=vs-2019
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /GL /Gw") # These flags all turn on optimizations.
-elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
-    # At this time, we're not passing any options to the Intel compiler.
-else()
-    # The primary other options are GCC/Clang which use similar syntax.
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+    # These compilers should all use a similar syntax.
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
-endif()
+# For any other compilers, we're not setting any flags. This should help ensure that the program will at least compile with other compilers.
+endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 
-add_executable(escape src/main.cpp src/parseargs.cpp src/StreamPair.cpp src/StreamPair.h)
+add_executable(escape src/main.cpp src/parseargs.cpp src/StreamPair.cpp)
 
-# Here I'm just treating the test as another target.
-add_executable(runtest test/test.cpp)
+# Here I'm just treating the test as another target. TODO: write an actual test
+add_executable(runtest src/main.cpp src/parseargs.cpp src/StreamPair.cpp)
