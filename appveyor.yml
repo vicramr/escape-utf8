@@ -30,6 +30,9 @@ environment:
 #    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
 #      GENERATOR: "MSYS Makefiles"
 
+install:
+  - ps: git submodule update --init --recursive
+
 # Note: was having issues with cmd not properly passing the quoted variable
 # to cmake, so I switched to powershell. Judging from googletest's appveyor.yml,
 # it seems that this should work: https://github.com/google/googletest/blob/master/appveyor.yml
