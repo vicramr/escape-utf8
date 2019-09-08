@@ -16,12 +16,6 @@
  * It looks like constructing ifstream/ofstream can only fail if the file cannot
  * be opened. If that happens, then the failbit is set; see here (we're using constructor 4):
  * https://en.cppreference.com/w/cpp/io/basic_ifstream/basic_ifstream
- *
- * Also note that if there's an exception thrown in StreamPair's constructor, StreamPair's
- * destructor will not be called, so we still need to clean up any allocated fstreams.
- * See FAQ: https://isocpp.org/wiki/faq/exceptions#selfcleaning-members
- * (The FAQ recommends dealing with the issue by using smart pointers, but we're using raw pointers
- * so we have to manually delete.)
  */
 
 void StreamPair::init_in(const std::string &inputfile) {
@@ -78,7 +72,7 @@ StreamPair::StreamPair(bool, bool) {
     delete_out = false;
 }
 
-StreamPair::~StreamPair() {
+void StreamPair::free() {
     if (delete_in) {
         delete in;
     }

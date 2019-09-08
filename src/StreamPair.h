@@ -16,8 +16,8 @@ class FileError : public std::exception {};
  * used throughout the program.
  *
  * Usage:
- *   All resource management is handled internally, so the user doesn't need
- *   to worry about deallocating anything.
+ *   The user must call free() when done with this object in order to make sure
+ *   that all allocated resources are deallocated.
  *
  *   There are 4 constructors, and all are used the same way. The first positional
  *   argument is the name of the input file or, if we're reading from stdin, a
@@ -66,7 +66,7 @@ public:
     StreamPair(const std::string& inputfile, bool);
     StreamPair(bool, const std::string& outputfile);
     StreamPair(bool, bool);
-    ~StreamPair();
+    void free();
 private:
     bool delete_in;
     bool delete_out;

@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.1)
 project(escape_utf8)
 
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # In case we're using a single-generation generator (such as Make)
 # we need to set a default configuration. See here for more info on Debug/Release configs:
@@ -22,7 +23,7 @@ endif()
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
     # Don't need to add any flags for debug. Optimizations are turned off by default: https://docs.microsoft.com/en-us/cpp/build/reference/od-disable-debug?view=vs-2019
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /GL /Gw") # These flags all turn on optimizations.
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /DNDEBUG /O2 /GL /Gw") # Except /DNDEBUG, these flags all turn on optimizations.
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
     # These compilers should all use a similar syntax.
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
@@ -31,7 +32,7 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" S
 # For any other compilers, we're not setting any flags. This should help ensure that the program will at least compile with other compilers.
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 
-add_executable(escape src/main.cpp src/parseargs.cpp src/StreamPair.cpp)
+add_executable(escape src/main.cpp src/parseargs.cpp src/StreamPair.cpp src/business_logic.cpp)
 
 # Here I'm just treating the test as another target. TODO: write an actual test
-add_executable(runtest src/main.cpp src/parseargs.cpp src/StreamPair.cpp)
+add_executable(runtest src/main.cpp src/parseargs.cpp src/StreamPair.cpp src/business_logic.cpp)

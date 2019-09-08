@@ -5,7 +5,7 @@
 #include <iostream>
 #include <bitset>
 #include <cassert>
-#include <cstring> // size_t and std::strncmp
+#include <cstring> // std::size_t and std::strncmp
 
 #include "parseargs.h"
 
@@ -48,20 +48,9 @@ static std::string const helpmsg(
 "                                    does exist, it will be overwritten.\n"
 );
 
-/*
- * Defined these as std::strings so that I could easily do something like
- * argv[1] == dash_o` and get the overloaded operator== that compares
- * char* to std::string.
- */
-static std::string const dash_o("-o");
-static std::string const dash_dash_output("--output");
-static std::string const dash_h("-h");
-static std::string const dash_dash_help("--help");
-static std::string const dash_v("-v");
-static std::string const dash_dash_version("--version");
 
 std::bitset<3> parse_helper(int argc, char **argv, std::string& inputfile, std::string& outputfile);
-bool strlen_atleast(const char *str, size_t len);
+bool strlen_atleast(const char *str, std::size_t len);
 int check_output_option(const char *arg);
 
 
@@ -71,8 +60,8 @@ StreamPair parse(int argc, char **argv) {
      * neither (which is valid), and invalid.
      */
 
-    std::string inputfile(""); // If an arg is given, it's guaranteed to have length > 0, so the empty string serves as our "null" value.
-    std::string outputfile("");
+    std::string inputfile; // If an arg is given, it's guaranteed to have length > 0, so the empty string serves as our "null" value.
+    std::string outputfile;
     std::bitset<3> bits = parse_helper(argc, argv, inputfile, outputfile);
     // Bit 0 is "help", bit 1 is "version", bit 2 is "valid"
     if (bits[1]) {
@@ -116,7 +105,7 @@ StreamPair parse(int argc, char **argv) {
  * This string must be empty when passed into parse_helper() so that you will be able to tell
  * whether something has been stored in it.
  * @param outputfile Just like inputfile, but for the OUTPUTFILE arg.
- * @return A bitset with 3 bits. This
+ * @return A bitset with 3 bits. This encodes the relevant information about the given args.
  * Bit 0 is the "help" bit; it is 1 iff you should print the help message and exit.
  * Bit 1 is the "version" bit; it is 1 iff you should print the version-number message and exit.
  * Bit 2 is the "valid" bit. It is 1 if the given command-line args are valid and you
@@ -129,6 +118,19 @@ StreamPair parse(int argc, char **argv) {
  * either because of the help flag or the version flag.
  */
 std::bitset<3> parse_helper(int argc, char **argv, std::string& inputfile, std::string& outputfile) {
+    /*
+     * Defined these as std::strings so that I could easily do something like
+     * argv[1] == dash_o` and get the overloaded operator== that compares
+     * char* to std::string.
+     */
+    std::string const dash_o("-o");
+    std::string const dash_dash_output("--output");
+    std::string const dash_h("-h");
+    std::string const dash_dash_help("--help");
+    std::string const dash_v("-v");
+    std::string const dash_dash_version("--version");
+
+
     assert(inputfile.empty());
     assert(outputfile.empty());
     std::bitset<3> bits;
@@ -241,17 +243,18 @@ int check_output_option(const char *arg) {
 }
 
 /**
- * Returns whether the given null-terminated string has a length of at least len.
+ * Returns whether the given null-terminated string has a length of at least len,
+ * not including the null byte.
  *
  * This function will not read more than len characters from the string, so if
  * the string's length is much larger than len, this function will be faster than
- * using something like strlen().
+ * the expression (strlen(str) >= len).
  * @param str A null-terminated string.
  * @param len The desired length to check for.
  * @return True if there are at least len non-null characters in str, false otherwise.
  */
-bool strlen_atleast(const char *str, size_t len) {
-    for (size_t i = 0; i < len; ++i) {
+bool strlen_atleast(const char *str, std::size_t len) {
+    for (std::size_t i = 0; i < len; ++i) {
         if (str[i] == '\0') {
             return false;
         }
