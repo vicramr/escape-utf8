@@ -31,7 +31,7 @@ environment:
 #      GENERATOR: "MSYS Makefiles"
 
 install:
-  - ps: git submodule update --init --recursive
+  - git submodule update --init --recursive
 
 # Note: was having issues with cmd not properly passing the quoted variable
 # to cmake, so I switched to powershell. Judging from googletest's appveyor.yml,
