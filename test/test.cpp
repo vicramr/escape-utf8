@@ -2,9 +2,9 @@
 // Created by Vicram on 8/23/2019.
 //
 
-#include <iostream>
-
-int main(int argc, char *argv[]) {
-    std::cout << "argc is: " << argc << std::endl;
-    return 0;
-}
+/*
+ * This is the Catch test runner file, as recommended by the docs:
+ * https://github.com/catchorg/Catch2/blob/master/docs/tutorial.md#scaling-up
+ */
+#define CATCH_CONFIG_MAIN
+#include "../Catch2/single_include/catch2/catch.hpp"
