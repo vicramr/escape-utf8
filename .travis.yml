@@ -35,6 +35,8 @@ matrix:
           update: true
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+# NOTE: The gcc5 build outputs lots of warnings like the ones in this SO question: https://stackoverflow.com/q/39865367
+# An answerer says it's nothing to worry about.
     - name: "Clang on macOS 10.12"
       os: osx
       osx_image: xcode9.2
