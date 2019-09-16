@@ -5,15 +5,11 @@
 /*
  * This file contains tests for the helper functions in parseargs.cpp.
  */
-#include <bitset>
-#include <cstring>
-#include <string>
+#include <cstring> // std::size_t
 
 #include "../Catch2/single_include/catch2/catch.hpp"
-#include "../src/parseargs.h"
 
 // Function prototypes for functions that aren't exposed through the headers
-std::bitset<3> parse_helper(int argc, char **argv, std::string& inputfile, std::string& outputfile);
 bool strlen_atleast(const char *str, std::size_t len);
 int check_output_option(const char *arg);
 
@@ -46,8 +42,4 @@ TEST_CASE("Test check_output_option", "[check_output_option]") {
     REQUIRE(check_output_option("foo") == -1);
 }
 
-TEST_CASE("Test parse_helper", "[parse_helper]") {
-    std::string inputfile;
-    std::string outputfile;
-
-}
+// TODO write integration tests for parse/parse_helper
