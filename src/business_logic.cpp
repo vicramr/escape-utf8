@@ -34,7 +34,7 @@
 /**
  * Given a buffer and a Unicode code point, this function constructs the escape
  * string for that code point. For example, given the code point 1000 (hex value 0x3E8)
- * this function would write to the buffer "\u03e8".
+ * this function would write to the buffer "\u03e8". All letters will be lowercase.
  *
  * Any number whose hex representation would fit in less than 4 characters (like 0x3E8)
  * will be padded by leading zeros to reach 4 characters. No padding is done for larger
@@ -46,10 +46,10 @@
 std::size_t construct_escape_string(unsigned char *buf, std::uint_fast32_t codepoint) {
     // Using a solution modified from here: https://stackoverflow.com/a/5100745
     std::stringstream stream;
-    if (codepoint < 0xF000u) { // If number is less than 4 chars, pad it
+    if (codepoint < 0x1000u) { // If number is less than 4 chars, pad it
         stream << std::setfill('0') << std::setw(4);
     }
-    stream << std::hex << codepoint;
+    stream << std::hex << std::nouppercase << codepoint; // For the ordering of hex/nouppercase see this example: https://en.cppreference.com/w/cpp/io/manip/uppercase
     std::string result(stream.str()); // TODO can we optimize out the copy done by stream.str()?
     assert(result.length() >= 4 && result.length() <= 6);
     // Finally, copy the hex string over to the buffer.

@@ -41,4 +41,4 @@ endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 add_executable(escape src/main.cpp src/parseargs.cpp src/StreamPair.cpp src/business_logic.cpp)
 
 # Here I'm just treating the test as another target.
-add_executable(runtest test/test.cpp src/parseargs.cpp src/StreamPair.cpp src/business_logic.cpp test/unit_tests_parseargs.cpp)
+add_executable(runtest test/test.cpp src/parseargs.cpp src/StreamPair.cpp src/business_logic.cpp test/unit_tests_parseargs.cpp test/unit_tests_business_logic.cpp)
