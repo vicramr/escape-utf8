@@ -5,6 +5,12 @@ project(escape_utf8)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Note that CMake versions prior to 3.10 don't add standard switches to
+# the compiler invocation for MSVC: https://stackoverflow.com/a/46876754
+# In addition, versions of MSVC prior to VS 2015 Update 3 don't have them at all.
+# Reference: https://devblogs.microsoft.com/cppblog/standards-version-switches-in-the-compiler/
+# Just something to keep in mind; shouldn't break any compiler that would otherwise
+# build successfully, as (I think) MSVC 2015 will support c++14 features by default.
 
 # In case we're using a single-generation generator (such as Make)
 # we need to set a default configuration. See here for more info on Debug/Release configs:
@@ -21,11 +27,7 @@ endif()
 # Some inspiration taken from this SO post: https://stackoverflow.com/q/45955272
 # and from this CMakeLists.txt file: https://github.com/leela-zero/leela-zero/blob/next/CMakeLists.txt
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    # It seems that CMake may not be checking that the compiler supports the desired standard so
-    # I'm giving the /std:c++14 flag to make sure. Note that this may break on VS 2015 installations
-    # that aren't at least up-to-date with Update 3, because that's when this flag was added:
-    # https://devblogs.microsoft.com/cppblog/standards-version-switches-in-the-compiler/
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /std:c++14")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
     # Don't need to add any flags for debug. Optimizations are turned off by default: https://docs.microsoft.com/en-us/cpp/build/reference/od-disable-debug?view=vs-2019
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /DNDEBUG /O2 /GL /Gw") # Except /DNDEBUG, these flags all turn on optimizations.
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
