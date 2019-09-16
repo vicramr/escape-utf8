@@ -23,7 +23,8 @@ void StreamPair::init_in(const std::string &inputfile) {
     delete_in = true;
 
     if (in->fail()) {
-        std::cout << "Failed to open input file \"" << inputfile << "\". Exiting now." << std::endl;
+        // The two newlines are because this program always prefaces any error message with 2 newlines (see help msg)
+        std::cerr << std::endl << std::endl << "Failed to open input file \"" << inputfile << "\". Exiting now." << std::endl;
         delete in;
         throw FileError();
     }
@@ -34,7 +35,7 @@ void StreamPair::init_out(const std::string &outputfile) {
     delete_out = true;
 
     if (out->fail()) {
-        std::cout << "Failed to open output file \"" << outputfile << "\". Exiting now." << std::endl;
+        std::cerr << std::endl << std::endl << "Failed to open output file \"" << outputfile << "\". Exiting now." << std::endl;
         // init_out is always called after init_in so we need to worry about deallocating in here
         if (delete_in) {
             delete in;

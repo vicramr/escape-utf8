@@ -64,7 +64,8 @@ std::size_t construct_escape_string(unsigned char *buf, std::uint_fast32_t codep
  * that when the end user gets their error message, it's on a new line rather than concatenated
  * to the end of the escaped output text. Of course, that's only important if we're writing the
  * escaped text to stdout, because otherwise we wouldn't have the issue that normal output and
- * error text are being printed to the same stream.
+ * error text are being printed to the same stream. But to maintain consistency I think it's
+ * best to always do this.
  */
 void get_stderr_ready() {
     std::cerr << std::endl << std::endl;

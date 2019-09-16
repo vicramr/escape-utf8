@@ -18,9 +18,9 @@ int main(int argc, char *argv[]) {
         int retval = read_and_escape(streams);
         streams.free();
         return retval;
-    } catch (EarlyFinish& e) {
+    } catch (const EarlyFinish& e) {
         return 0;
-    } catch (FileError& e) {
+    } catch (const FileError& e) {
         return 1;
     }
 }
