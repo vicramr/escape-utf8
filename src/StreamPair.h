@@ -8,6 +8,7 @@
 #include <istream>
 #include <ostream>
 #include <exception>
+#include <string>
 
 class FileError : public std::exception {};
 
@@ -49,6 +50,11 @@ class FileError : public std::exception {};
  *   wouldn't work because I want covariance; I want to be able to store a pointer
  *   to the parent class (std::istream and std::ostream).
  *   So I have to resort to using raw pointers.
+ *
+ *   There's one other issue: std::istream and std::ostream use signed char in the
+ *   type parameter by default. This is annoying, because I use unsigned chars everywhere,
+ *   but it's necessary because std::cin and std::cout are parameterized on signed chars.
+ *   This just means we have to cast in business_logic.cpp.
  */
 class StreamPair {
 public:

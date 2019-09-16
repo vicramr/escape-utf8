@@ -105,8 +105,32 @@ int read_and_escape(const StreamPair& streams) {
     assert(buf[0] == 92);
     assert(buf[1] == 117);
 
+    unsigned char byte;
+    for (streams.in->get(reinterpret_cast<char &>(byte)); streams.in->good() && streams.out->good(); streams.in->get(reinterpret_cast<char &>(byte))) {
+        // We use the form 'in->get(byte)' rather than 'byte = in->get()' because it is more
+        // type-safe. See reference: https://en.cppreference.com/w/cpp/io/basic_istream/get
+        // Because the stream are parameterized on SIGNED chars, we have to do some casting.
+        // The correct cast is reinterpret_cast<char &>(byte). Specifically, we're doing
+        // the 6th kind of conversion listed here: https://en.cppreference.com/w/cpp/language/reinterpret_cast
+        // Here is the text of that conversion:
+        //   "An lvalue expression of type T1 can be converted to reference to another type T2. The result is an
+        //    lvalue or xvalue referring to the same object as the original lvalue, but with a different type. No
+        //    temporary is created, no copy is made, no constructors or conversion functions are called. The resulting
+        //    reference can only be accessed safely if allowed by the type aliasing rules"
+        // The type aliasing rules are listed below on the same page, and one of them SPECIFICALLY refers
+        // to converting to char or unsigned char, stating "this permits examination of the object representation
+        // of any object as an array of bytes." So that's the correct way to do this.
 
-    for (unsigned char byte = streams.in->get(); streams.in->good() && streams.out->good(); byte = streams.in->get()) {
+        // As a side note, it looks like static_cast wouldn't work. I read the 10 conversion types here,
+        // and it looks like only the first one applies to this case:
+        // https://en.cppreference.com/w/cpp/language/static_cast
+        // This case would involve an "implicit conversion sequence" from unsigned char to char.
+        // (I didn't really consider converting to char &.)
+        // Of the implicit conversion, the only one that would apply here is Integral Promotion,
+        // and there is no promotion from unsigned char to signed char (or vice versa). This
+        // makes sense, because assuming that both are stored in 8 bits, a conversion either
+        // way would involve data loss.
+
         ++num_bytes_read; // Mark the byte as read (we have to check good() first)
 
         // First, we'll check if the character is printable. This includes 33-126
@@ -150,7 +174,7 @@ int read_and_escape(const StreamPair& streams) {
         decoded_char = (byte & mask);
         // Next, read the rest of the bytes, check that the first two bits are '10', and grab the last 6 bits.
         for (int i = 1; i < numbytes; ++i) { // we start at 1 because we've already read the first byte.
-            byte = streams.in->get();
+            streams.in->get(reinterpret_cast<char &>(byte));
             if (!streams.in->good()) {
                 // As mentioned above, the only valid combination of state flags is
                 // eofbit, failbit, and not badbit.
@@ -231,9 +255,12 @@ int read_and_escape(const StreamPair& streams) {
     // through the loop which doesn't result in a return statement ends with both a
     // write operation (from streams.out->put or streams.out->write) and a read operation
     // (from the streams.in->get in the for statement).
-    // The upshot of this is that no matter what, we need to check the status of both streams.
+    // The upshot of this is that we need to check the status of both streams.
 
     if (streams.out->fail()) {
+        // I don't bother also checking streams.in here because the only reason to would be
+        // to print a slightly different error message saying "there was an error in both
+        // reading and writing."
         get_stderr_ready();
         std::cerr << "There was a fatal error when trying to write to the output. Exiting now." << std::endl;
         return 3;
