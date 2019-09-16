@@ -21,7 +21,11 @@ endif()
 # Some inspiration taken from this SO post: https://stackoverflow.com/q/45955272
 # and from this CMakeLists.txt file: https://github.com/leela-zero/leela-zero/blob/next/CMakeLists.txt
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+    # It seems that CMake may not be checking that the compiler supports the desired standard so
+    # I'm giving the /std:c++14 flag to make sure. Note that this may break on VS 2015 installations
+    # that aren't at least up-to-date with Update 3, because that's when this flag was added:
+    # https://devblogs.microsoft.com/cppblog/standards-version-switches-in-the-compiler/
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /std:c++14")
     # Don't need to add any flags for debug. Optimizations are turned off by default: https://docs.microsoft.com/en-us/cpp/build/reference/od-disable-debug?view=vs-2019
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /DNDEBUG /O2 /GL /Gw") # Except /DNDEBUG, these flags all turn on optimizations.
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
