@@ -127,7 +127,7 @@ int read_and_escape(const StreamPair& streams) {
         // https://en.cppreference.com/w/cpp/language/static_cast
         // This case would involve an "implicit conversion sequence" from unsigned char to char.
         // (I didn't really consider converting to char &.)
-        // Of the implicit conversion, the only one that would apply here is Integral Promotion,
+        // Of the implicit conversions, the only one that would apply here is Integral Promotion,
         // and there is no promotion from unsigned char to signed char (or vice versa). This
         // makes sense, because assuming that both are stored in 8 bits, a conversion either
         // way would involve data loss.
