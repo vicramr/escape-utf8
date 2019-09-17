@@ -169,7 +169,7 @@ int read_and_escape(const StreamPair& streams) {
             // TODO: I've commented out several error messages because I didn't want to write tests for them. Might do that at some point.
 //            std::cerr << "Byte " << num_bytes_read << " is invalid: 0x" << std::hex << ((unsigned int)byte) <<
 //            " is not valid as the first character in a UTF-8 character." << std::endl;
-            return 1;
+            return 2;
         }
         // First we grab the 5, 4, or 3 relevant bits from the first byte and get them into position in decoded_char.
         decoded_char = (byte & mask);
@@ -185,11 +185,11 @@ int read_and_escape(const StreamPair& streams) {
 //                    std::cerr << "Reached EOF after reading " << num_bytes_read <<
 //                    " byte(s). The given text is NOT valid UTF-8 text because it stopped in the middle of a multi-byte UTF-8 character."
 //                    << std::endl;
-                    return 1;
+                    return 2;
                 } else {
                     get_stderr_ready();
                     std::cerr << "Failed when trying to read byte " << (num_bytes_read + 1) << " due to unknown error." << std::endl;
-                    return 2;
+                    return 3;
                 }
 
             }
@@ -210,7 +210,7 @@ int read_and_escape(const StreamPair& streams) {
 //                std::cerr << "The given text is not valid UTF-8 text. Byte " << num_bytes_read <<
 //                " was supposed to be the " << ordinal << " byte in a multi-byte UTF-8 character but it is not in the valid range."
 //                << std::endl;
-                return 1;
+                return 2;
             }
             decoded_char <<= 6u; // TODO might be faster to instead shift each bit to its final position when assigning
             decoded_char |= ((uint_fast32_t)(byte & 0b00111111u));
@@ -225,7 +225,7 @@ int read_and_escape(const StreamPair& streams) {
 //            std::cerr << "The given text is not valid UTF-8 text. "
 //            << "Bytes " << (numbytes-1) << " and " << numbytes << " form a 2-byte UTF-8 character with value 0x"
 //            << std::hex << decoded_char << "which is outside the valid range of [0x80, 0x7FF]." << std::endl;
-            return 1;
+            return 2;
         }
         if (numbytes == 3 && (decoded_char < 0x800u || decoded_char > 0xFFFFu)) {
             get_stderr_ready();
@@ -233,7 +233,7 @@ int read_and_escape(const StreamPair& streams) {
 //            std::cerr << "The given text is not valid UTF-8 text. "
 //            << "Bytes " << (numbytes-2) << ", " << (numbytes-1) << ", and " << numbytes << " form a 3-byte UTF-8 character with value 0x"
 //            << std::hex << decoded_char << "which is outside the valid range of [0x800, 0xFFFF]." << std::endl;
-            return 1;
+            return 2;
         }
         if (numbytes == 4 && (decoded_char < 0x10000u || decoded_char > 0x10FFFFu)) {
             get_stderr_ready();
@@ -241,7 +241,7 @@ int read_and_escape(const StreamPair& streams) {
 //            std::cerr << "The given text is not valid UTF-8 text. "
 //            << "Bytes " << (numbytes-3) << " through " << numbytes << " form a 4-byte UTF-8 character with value 0x"
 //            << std::hex << decoded_char << "which is outside the valid range of [0x10000, 0x10FFFF]." << std::endl;
-            return 1;
+            return 2;
         }
 
         // Finally, we can print out the escaped character and move on.
@@ -264,7 +264,7 @@ int read_and_escape(const StreamPair& streams) {
         // reading and writing."
         get_stderr_ready();
         std::cerr << "There was a fatal error when trying to write to the output. Exiting now." << std::endl;
-        return 3;
+        return 4;
     }
     if (streams.in->eof() && streams.in->fail() && (!streams.in->bad())) {
         // This is the success case: exited because we reached EOF, and it wasn't
@@ -273,7 +273,7 @@ int read_and_escape(const StreamPair& streams) {
     } else {
         get_stderr_ready();
         std::cerr << "Failed when trying to read byte " << (num_bytes_read + 1) << " due to unknown error." << std::endl;
-        return 2;
+        return 3;
     }
 
 }
