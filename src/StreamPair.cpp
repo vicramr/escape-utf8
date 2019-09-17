@@ -29,7 +29,7 @@
  *   https://en.cppreference.com/w/cpp/io/basic_ifstream/basic_ifstream
  */
 
-auto deleter = [](auto p){};
+auto deleter = [](auto){}; // parameter name omitted to silence "unused parameter" warnings
 
 void StreamPair::check_in(const std::string& inputfile) {
     if (in->fail()) {
