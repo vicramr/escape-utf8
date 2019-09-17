@@ -8,8 +8,7 @@
 #include <cstring> // std::size_t and std::strncmp
 
 #include "parseargs.h"
-
-#define VERSION "TODO"
+#include "../version.h"
 
 static std::string const helpmsg(
 // This is a C++11 raw string literal.
@@ -74,7 +73,7 @@ StreamPair parse(int argc, char **argv) {
     // Bit 0 is "help", bit 1 is "version", bit 2 is "valid"
     if (bits[1]) {
         assert(bits[2]);
-        std::cout << VERSION << std::endl;
+        std::cout << "escape-utf8 version " << MAJOR << "." << MINOR << "." << PATCH << std::endl;
         throw EarlyFinish();
     }
     if (!bits[2]) {
@@ -82,7 +81,7 @@ StreamPair parse(int argc, char **argv) {
         std::cout << "The given input is not a valid usage of this program. Please see the below usage instructions." << std::endl << std::endl;
     }
     if (bits[0]) {
-        std::cout << helpmsg << std::endl;
+        std::cout << helpmsg; // helpmsg already has a newline at the end
         throw EarlyFinish();
     }
     assert(bits[2]);
