@@ -28,8 +28,8 @@ By default, the output is written to stdout, but it can be redirected to an
 output file.
 
 In the event of any error, such as a failure to write to the output file or
-input text which is not valid UTF-8, this program will print 2 newlines
-then an error message (all to stderr) and exit with a nonzero exit code.
+input text which is not valid UTF-8, this program will write an error message
+to stderr and exit with a nonzero exit code.
 On success, nothing extra will be printed (only the escaped text) and the
 program will exit with an exit code of 0.
 

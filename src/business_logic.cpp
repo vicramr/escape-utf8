@@ -45,30 +45,16 @@
  */
 std::size_t construct_escape_string(unsigned char *buf, std::uint_fast32_t codepoint) {
     // Using a solution modified from here: https://stackoverflow.com/a/5100745
-    std::stringstream stream;
+    std::basic_stringstream<unsigned char> stream;
     if (codepoint < 0x1000u) { // If number is less than 4 chars, pad it
-        stream << std::setfill('0') << std::setw(4);
+        stream << std::setfill<unsigned char>('0') << std::setw(4);
     }
     stream << std::hex << std::nouppercase << codepoint; // For the ordering of hex/nouppercase see this example: https://en.cppreference.com/w/cpp/io/manip/uppercase
-    std::string result(stream.str()); // TODO can we optimize out the copy done by stream.str()?
-    assert(result.length() >= 4 && result.length() <= 6);
-    // Finally, copy the hex string over to the buffer.
-    for (std::size_t i = 0; i < result.length(); ++i) {
-        buf[i + 2] = result[i];
-    }
-    return result.length() + 2;
-}
-
-/**
- * This function will print out some newlines to stderr. Its only purpose is to make sure
- * that when the end user gets their error message, it's on a new line rather than concatenated
- * to the end of the escaped output text. Of course, that's only important if we're writing the
- * escaped text to stdout, because otherwise we wouldn't have the issue that normal output and
- * error text are being printed to the same stream. But to maintain consistency I think it's
- * best to always do this.
- */
-void get_stderr_ready() {
-    std::cerr << std::endl << std::endl;
+    // We can use the read method (basic_istream::read) to write the chars directly to buf
+    stream.read(buf + 2, 6); // This tries to read 6 chars but will stop at EOF
+    auto num_chars_read = stream.gcount();
+    assert(num_chars_read >= 4 && num_chars_read <= 6);
+    return num_chars_read + 2;
 }
 
 int read_and_escape(const StreamPair& streams) {
@@ -164,7 +150,6 @@ int read_and_escape(const StreamPair& streams) {
             numbytes = 4;
             mask = 0b00000111u;
         } else {
-            get_stderr_ready();
             std::cerr << "The given text is not valid UTF-8 text. Exiting now." << std::endl;
             // TODO: I've commented out several error messages because I didn't want to write tests for them. Might do that at some point.
 //            std::cerr << "Byte " << num_bytes_read << " is invalid: 0x" << std::hex << ((unsigned int)byte) <<
@@ -180,14 +165,12 @@ int read_and_escape(const StreamPair& streams) {
                 // As mentioned above, the only valid combination of state flags is
                 // eofbit, failbit, and not badbit.
                 if (streams.in->eof() && streams.in->fail() && (!streams.in->bad())) {
-                    get_stderr_ready();
                     std::cerr << "The given text is not valid UTF-8 text. Exiting now." << std::endl;
 //                    std::cerr << "Reached EOF after reading " << num_bytes_read <<
 //                    " byte(s). The given text is NOT valid UTF-8 text because it stopped in the middle of a multi-byte UTF-8 character."
 //                    << std::endl;
                     return 2;
                 } else {
-                    get_stderr_ready();
                     std::cerr << "Failed when trying to read byte " << (num_bytes_read + 1) << " due to unknown error." << std::endl;
                     return 3;
                 }
@@ -196,7 +179,6 @@ int read_and_escape(const StreamPair& streams) {
             ++num_bytes_read;
             if ((byte & 0b11000000u) != 0b10000000u) {
                 // The first two bits aren't '10' so the file is not valid UTF-8
-                get_stderr_ready();
                 std::cerr << "The given text is not valid UTF-8 text. Exiting now." << std::endl;
 //                std::string ordinal;
 //                if (i == 1) {
@@ -220,7 +202,6 @@ int read_and_escape(const StreamPair& streams) {
         // a 2- or 3- or 4-byte UTF-8 character. See page 5 of RFC 3629, where they discuss "a naive implementation":
         // https://tools.ietf.org/html/rfc3629
         if (numbytes == 2 && (decoded_char < 0x80u || decoded_char > 0x7FFu)) {
-            get_stderr_ready();
             std::cerr << "The given text is not valid UTF-8 text. Exiting now." << std::endl;
 //            std::cerr << "The given text is not valid UTF-8 text. "
 //            << "Bytes " << (numbytes-1) << " and " << numbytes << " form a 2-byte UTF-8 character with value 0x"
@@ -228,7 +209,6 @@ int read_and_escape(const StreamPair& streams) {
             return 2;
         }
         if (numbytes == 3 && (decoded_char < 0x800u || decoded_char > 0xFFFFu)) {
-            get_stderr_ready();
             std::cerr << "The given text is not valid UTF-8 text. Exiting now." << std::endl;
 //            std::cerr << "The given text is not valid UTF-8 text. "
 //            << "Bytes " << (numbytes-2) << ", " << (numbytes-1) << ", and " << numbytes << " form a 3-byte UTF-8 character with value 0x"
@@ -236,7 +216,6 @@ int read_and_escape(const StreamPair& streams) {
             return 2;
         }
         if (numbytes == 4 && (decoded_char < 0x10000u || decoded_char > 0x10FFFFu)) {
-            get_stderr_ready();
             std::cerr << "The given text is not valid UTF-8 text. Exiting now." << std::endl;
 //            std::cerr << "The given text is not valid UTF-8 text. "
 //            << "Bytes " << (numbytes-3) << " through " << numbytes << " form a 4-byte UTF-8 character with value 0x"
@@ -262,7 +241,6 @@ int read_and_escape(const StreamPair& streams) {
         // I don't bother also checking streams.in here because the only reason to would be
         // to print a slightly different error message saying "there was an error in both
         // reading and writing."
-        get_stderr_ready();
         std::cerr << "There was a fatal error when trying to write to the output. Exiting now." << std::endl;
         return 4;
     }
@@ -271,7 +249,6 @@ int read_and_escape(const StreamPair& streams) {
         // in the middle of a character.
         return 0;
     } else {
-        get_stderr_ready();
         std::cerr << "Failed when trying to read byte " << (num_bytes_read + 1) << " due to unknown error." << std::endl;
         return 3;
     }

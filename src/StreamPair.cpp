@@ -33,15 +33,14 @@ auto deleter = [](auto){}; // parameter name omitted to silence "unused paramete
 
 void StreamPair::check_in(const std::string& inputfile) {
     if (in->fail()) {
-        // The two newlines are because this program always prefaces any error message with 2 newlines (see help msg)
-        std::cerr << std::endl << std::endl << "Failed to open input file \"" << inputfile << "\". Exiting now." << std::endl;
+        std::cerr << "Failed to open input file \"" << inputfile << "\". Exiting now." << std::endl;
         throw FileError();
     }
 }
 
 void StreamPair::check_out(const std::string &outputfile) {
     if (out->fail()) {
-        std::cerr << std::endl << std::endl << "Failed to open output file \"" << outputfile << "\". Exiting now." << std::endl;
+        std::cerr << "Failed to open output file \"" << outputfile << "\". Exiting now." << std::endl;
         throw FileError();
     }
 }
