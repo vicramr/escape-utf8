@@ -9,6 +9,7 @@
 #include <ostream>
 #include <exception>
 #include <string>
+#include <memory>
 
 class FileError : public std::exception {};
 
@@ -17,8 +18,8 @@ class FileError : public std::exception {};
  * used throughout the program.
  *
  * Usage:
- *   The user must call free() when done with this object in order to make sure
- *   that all allocated resources are deallocated.
+ *   All resources are managed internally. The user doesn't need to worry about
+ *   deallocating anything.
  *
  *   There are 4 constructors, and all are used the same way. The first positional
  *   argument is the name of the input file or, if we're reading from stdin, a
@@ -38,19 +39,17 @@ class FileError : public std::exception {};
  *   best practice: https://isocpp.org/wiki/faq/exceptions#ctors-can-throw
  *
  *
- *   I wanted to carry around smart pointers to the streams rather
- *   than raw pointers, but I think this is fundamentally impossible:
- *     - in must be able to point to either a std::ifstream or std::cin, and
- *       out must be able to point to either a std::ofstream or std::cout.
- *     - It doesn't make sense to have any kind of smart pointer to std::cin
- *       or std::cout, because I'm not managing the lifetime of those objects.
- *   Barring that, I would've liked to store the value of the object itself
- *   in this class, but that won't work either because copy assignment is
- *   not allowed for streams; it doesn't make sense to copy them. It also
- *   wouldn't work because I want covariance; I want to be able to store a pointer
- *   to the parent class (std::istream and std::ostream).
- *   So I have to resort to using raw pointers.
- *
+ *   I'm using shared_ptrs to hold the streams largely because unique_ptr isn't
+ *   copy-constructible or copy-assignable. I need to be able to construct the
+ *   StreamPair in one function and then pass it to another function. The best
+ *   solution would probably be to do a move, but in all honesty I don't quite
+ *   trust myself to write correct code with moves. 
+ *   This also rules out storing the value of the object itself, as opposed to a pointer.
+ *   That wouldn't work because copy assignment is not allowed for streams; it doesn't 
+ *   make sense to copy them. It also wouldn't work because I want covariance; I need to
+ *   be able to store a pointer to the parent class (std::istream and std::ostream).
+ * 
+ * 
  *   There's one other issue: std::istream and std::ostream use signed char in the
  *   type parameter by default. This is annoying, because I use unsigned chars everywhere,
  *   but it's necessary because std::cin and std::cout are parameterized on signed chars.
@@ -58,8 +57,8 @@ class FileError : public std::exception {};
  */
 class StreamPair {
 public:
-    std::istream *in;
-    std::ostream *out;
+    std::shared_ptr<std::istream> in;
+    std::shared_ptr<std::ostream> out;
     StreamPair() = delete;
 
     /*
@@ -72,13 +71,9 @@ public:
     StreamPair(const std::string& inputfile, bool);
     StreamPair(bool, const std::string& outputfile);
     StreamPair(bool, bool);
-    void free();
 private:
-    bool delete_in;
-    bool delete_out;
-
-    void init_in(const std::string &inputfile);
-    void init_out(const std::string &outputfile);
+    void check_in(const std::string& inputfile);
+    void check_out(const std::string& outputfile);
 };
 
 

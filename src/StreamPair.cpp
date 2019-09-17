@@ -8,76 +8,63 @@
 #include "StreamPair.h"
 
 /*
- * I've made init_in and init_out standalone functions so that I can encapsulate the
- * error handling.
- * This reference page documents all the ways that I/O functions can fail:
- * https://en.cppreference.com/w/cpp/io/ios_base/iostate
- *
- * It looks like constructing ifstream/ofstream can only fail if the file cannot
- * be opened. If that happens, then the failbit is set; see here (we're using constructor 4):
- * https://en.cppreference.com/w/cpp/io/basic_ifstream/basic_ifstream
+ * IMPLEMENTATION NOTES
+ * Shared Pointer Constructors:
+ *   For the cases where the filename is given, I'm using shared_ptr constructor 3:
+ *   https://en.cppreference.com/w/cpp/memory/shared_ptr/shared_ptr
+ *   This will do 'delete ptr' on the object, which is the desired behavior.
+ * 
+ *   For the cases where no filename is given, we don't want to do 'delete ptr'
+ *   because std::cin and std::cout are global variables. So I instead use constructor 4
+ *   and pass in a dummy deleter which doesn't do anything. I think that the way I created
+ *   and passed the deleter is valid, because one of the examples in that ref page declares
+ *   the deleter like this:
+ *     [](auto p) {std::cout << "Call delete from lambda...\n"; delete p;}
+ * 
+ * Error Handling:
+ *   This reference page documents all the ways that I/O functions can fail:
+ *   https://en.cppreference.com/w/cpp/io/ios_base/iostate
+ *   It looks like constructing ifstream/ofstream can only fail if the file cannot
+ *   be opened. If that happens, then the failbit is set; see here (we're using constructor 4):
+ *   https://en.cppreference.com/w/cpp/io/basic_ifstream/basic_ifstream
  */
 
-void StreamPair::init_in(const std::string &inputfile) {
-    in = new std::ifstream(inputfile);
-    delete_in = true;
+auto deleter = [](auto p){};
 
+void StreamPair::check_in(const std::string& inputfile) {
     if (in->fail()) {
         // The two newlines are because this program always prefaces any error message with 2 newlines (see help msg)
         std::cerr << std::endl << std::endl << "Failed to open input file \"" << inputfile << "\". Exiting now." << std::endl;
-        delete in;
         throw FileError();
     }
 }
 
-void StreamPair::init_out(const std::string &outputfile) {
-    out = new std::ofstream(outputfile);
-    delete_out = true;
-
+void StreamPair::check_out(const std::string &outputfile) {
     if (out->fail()) {
         std::cerr << std::endl << std::endl << "Failed to open output file \"" << outputfile << "\". Exiting now." << std::endl;
-        // init_out is always called after init_in so we need to worry about deallocating in here
-        if (delete_in) {
-            delete in;
-        }
-        delete out;
         throw FileError();
     }
 }
 
-StreamPair::StreamPair(const std::string &inputfile, const std::string &outputfile) {
-    init_in(inputfile);
-
-    init_out(outputfile);
+StreamPair::StreamPair(const std::string &inputfile, const std::string &outputfile) : 
+    in(new std::ifstream(inputfile)), 
+    out(new std::ofstream(outputfile)) {
+        check_in(inputfile);
+        check_out(outputfile);
 }
 
-StreamPair::StreamPair(const std::string &inputfile, bool) {
-    init_in(inputfile);
-
-    out = &std::cout;
-    delete_out = false;
+StreamPair::StreamPair(const std::string &inputfile, bool) : 
+    in(new std::ifstream(inputfile)), 
+    out(&std::cout, deleter) {
+        check_in(inputfile);
 }
 
-StreamPair::StreamPair(bool, const std::string &outputfile) {
-    in = &std::cin;
-    delete_in = false;
-
-    init_out(outputfile);
+StreamPair::StreamPair(bool, const std::string &outputfile) :
+    in(&std::cin, deleter),
+    out(new std::ofstream(outputfile)) {
+        check_out(outputfile);
 }
 
-StreamPair::StreamPair(bool, bool) {
-    in = &std::cin;
-    delete_in = false;
-
-    out = &std::cout;
-    delete_out = false;
-}
-
-void StreamPair::free() {
-    if (delete_in) {
-        delete in;
-    }
-    if (delete_out) {
-        delete out;
-    }
-}
+StreamPair::StreamPair(bool, bool) :
+    in(&std::cin, deleter),
+    out(&std::cout, deleter) {}

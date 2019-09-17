@@ -16,7 +16,6 @@ int main(int argc, char *argv[]) {
     try {
         StreamPair streams = parse(argc, argv);
         int retval = read_and_escape(streams);
-        streams.free();
         return retval;
     } catch (const EarlyFinish& e) {
         return 0;
