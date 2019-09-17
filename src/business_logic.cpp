@@ -31,6 +31,19 @@
 #define FOUR_BYTE_VAL   0b11110000u
 #define IS_FOUR_BYTES(x) ((FOUR_BYTE_MASK & x) == FOUR_BYTE_VAL)
 
+
+/*
+ * NOTE ON CASTING
+ * In a couple places I have to interpret a buffer of unsigned chars
+ * as a buffer of signed chars. I'm using reinterpret_cast<char *>
+ * to do this. Since both char and unsigned char should be stored as bytes,
+ * this shouldn't be a problem. However, from the docs, I'm not 100% sure what's
+ * going on under the hood. I think it's doing conversion 5 as listed here:
+ * https://en.cppreference.com/w/cpp/language/reinterpret_cast
+ * That's the one that starts with "Any object pointer type T1* can be converted to another object pointer type cv T2*."
+ */
+
+
 /**
  * Given a buffer and a Unicode code point, this function constructs the escape
  * string for that code point. For example, given the code point 1000 (hex value 0x3E8)
@@ -44,14 +57,19 @@
  * @return The number of characters in the escape string. Will be 6, 7, or 8.
  */
 std::size_t construct_escape_string(unsigned char *buf, std::uint_fast32_t codepoint) {
-    // Using a solution modified from here: https://stackoverflow.com/a/5100745
-    std::basic_stringstream<unsigned char> stream;
+    /*
+     * Using a solution modified from here: https://stackoverflow.com/a/5100745
+     * Note that std::stringstream uses signed chars by default. We just have to deal
+     * with it because there's no implementation for char_traits<unsigned char>.
+     * See here: https://en.cppreference.com/w/cpp/string/char_traits
+     */
+    std::stringstream stream;
     if (codepoint < 0x1000u) { // If number is less than 4 chars, pad it
-        stream << std::setfill<unsigned char>('0') << std::setw(4);
+        stream << std::setfill('0') << std::setw(4);
     }
     stream << std::hex << std::nouppercase << codepoint; // For the ordering of hex/nouppercase see this example: https://en.cppreference.com/w/cpp/io/manip/uppercase
     // We can use the read method (basic_istream::read) to write the chars directly to buf
-    stream.read(buf + 2, 6); // This tries to read 6 chars but will stop at EOF
+    stream.read(reinterpret_cast<char *>(buf + 2), 6); // This tries to read 6 chars but will stop at EOF
     auto num_chars_read = stream.gcount();
     assert(num_chars_read >= 4 && num_chars_read <= 6);
     return num_chars_read + 2;
@@ -225,7 +243,7 @@ int read_and_escape(const StreamPair& streams) {
 
         // Finally, we can print out the escaped character and move on.
         std::size_t buflen = construct_escape_string(buf, decoded_char);
-        streams.out->write((char *)buf, buflen);
+        streams.out->write(reinterpret_cast<char *>(buf), buflen);
         // We're only printing out ASCII chars so interpreting them as signed should be fine,
         // because all ASCII values are representable by a signed 8-bit int.
     }
