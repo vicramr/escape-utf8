@@ -72,7 +72,7 @@ std::size_t construct_escape_string(unsigned char *buf, std::uint_fast32_t codep
     stream.read(reinterpret_cast<char *>(buf + 2), 6); // This tries to read 6 chars but will stop at EOF
     auto num_chars_read = stream.gcount();
     assert(num_chars_read >= 4 && num_chars_read <= 6);
-    return num_chars_read + 2;
+    return static_cast<std::size_t>(num_chars_read + 2);
 }
 
 int read_and_escape(const StreamPair& streams) {
