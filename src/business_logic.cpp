@@ -213,7 +213,7 @@ int read_and_escape(const StreamPair& streams) {
                 return 2;
             }
             decoded_char <<= 6u; // TODO might be faster to instead shift each bit to its final position when assigning
-            decoded_char |= ((uint_fast32_t)(byte & 0b00111111u));
+            decoded_char |= static_cast<uint_fast32_t>(byte & 0b00111111u);
         }
         // We've now constructed an int with the numeric value of the Unicode character.
         // However, we still need to check that the value is within the appropriate range for
