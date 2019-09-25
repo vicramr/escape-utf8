@@ -13,25 +13,35 @@
 static std::string const helpmsg(
 // This is a C++11 raw string literal.
 R"<delim>(escape-utf8: Transform UTF-8 text to a representation in ASCII.
-This program takes as input single piece of text, either from a file or stdin.
-It outputs text in regular ASCII (that is, bytes with values from 0 to 127).
-In the output text, any ASCII characters will be unchanged, except for some
-control characters. All other characters (including the aforementioned control
-characters) will be output in escaped form; that is, they will be output as a
-sequence of 6 to 8 ASCII characters. For example, the Unicode character U+00F1
-(lowercase n with a tilde above it) would be expanded to the 6-character
-string "\u00f1" (without the quotes, of course), and U+1F602 (the laughing
-crying emoji, officially known as "face with tears of joy") would be expanded
-to the 7-character string "\u1f602".
+This program takes as input a single piece of text, either from a file
+or stdin. The text will be treated as if it's encoded in UTF-8. If the
+given text turns out to not be valid UTF-8 then the program will exit
+with an error message.
 
-By default, the output is written to stdout, but it can be redirected to an
-output file.
+This program outputs text in regular ASCII (that is, bytes with values
+from 0 to 127). In the output text, any ASCII characters will be
+unchanged, except for some control characters. All other characters
+(including the aforementioned control characters) will be output in
+escaped form; that is, they will be output as a sequence of 8 to 10
+ASCII characters.
 
-In the event of any error, such as a failure to write to the output file or
-input text which is not valid UTF-8, this program will write an error message
-to stderr and exit with a nonzero exit code.
-On success, nothing extra will be printed (only the escaped text) and the
-program will exit with an exit code of 0.
+Here are some examples of how characters are escaped:
+The Unicode character U+00F1 (lowercase n with a tilde above it) would
+be expanded to the 8-character string "\u'00F1'".
+U+1F602 (the laughing crying emoji, officially known as "Face with
+Tears of Joy") would be expanded to the 9-character string "\u'1F602'".
+Note that in the above strings, the inner single-quote characters will
+indeed be part of the output, while the outer double-quotes will not.
+No extra whitespace will be added before or after the expanded strings.
+
+By default, the output is written to stdout. This can be changed with
+the -o option.
+
+In the event of any error, such as a failure to write to the output
+file or input text which is not valid UTF-8, this program will write an
+error message to stderr and exit with a nonzero exit code.
+On success, nothing extra will be printed (only the escaped text) and
+the program will exit with an exit code of 0.
 
 
 Usage:
@@ -40,18 +50,20 @@ Usage:
   escape -v | --version
 
 Argument:
-  INPUTFILE    Path to the input file. This argument may be omitted; if so,
-               input will be read from stdin. This allows this program to be
-               used in a Unix pipe.
+  INPUTFILE    Path to the input file. This argument may be omitted; if
+               so, input will be read from stdin. This allows this
+               program to be used in a Unix pipe.
 
 Options:
   -h, --help                          Show this help message.
   -v, --version                       Show version.
-  -o OUTPUTFILE, --output OUTPUTFILE  Path to the file to write output to.
-                                      If this option is omitted, the output
-                                      will be printed to stdout. If the file
-                                      doesn't exist, it will be created; if it
-                                      does exist, it will be overwritten.
+  -o OUTPUTFILE, --output OUTPUTFILE  Path to the file to write output
+                                      to. If this option is omitted,
+                                      the output will be printed to
+                                      stdout. If the file doesn't exist
+                                      then it will be created; if it
+                                      does exist, it will be
+                                      overwritten.
 )<delim>"
 );
 

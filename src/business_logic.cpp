@@ -17,7 +17,7 @@
 /*
  * These are used to check the top few bits of the first byte of a multi-byte UTF-8 character,
  * in order to figure out how many bytes are in it.
- * Usage: iff IS_X_BYTES(byte) evaluates to true, then the character has X bytes.
+ * Usage: the character has X bytes iff IS_X_BYTES(byte) evaluates to true.
  */
 #define TWO_BYTE_MASK   0b11100000u
 #define TWO_BYTE_VAL    0b11000000u
@@ -46,15 +46,21 @@
 
 /**
  * Given a buffer and a Unicode code point, this function constructs the escape
- * string for that code point. For example, given the code point 1000 (hex value 0x3E8)
- * this function would write to the buffer "\u03e8". All letters will be lowercase.
+ * string for that code point. The first three bytes of the buffer should be "\u'"
+ * because those will be the same for every escape string. Note that in this docstring
+ * (and elsewhere in the codebase), when describing a sequence of characters, the outer
+ * quotes are external delimiters and SHOULD NOT be interpreted as being part of the
+ * sequence.
  *
- * Any number whose hex representation would fit in less than 4 characters (like 0x3E8)
+ * For example, given the code point 1000 (hex value 0x3E8) this function would write to the
+ * buffer "\u'03E8'". All letters will be uppercase.
+ *
+ * Any number whose hex representation would fit in less than 4 hex digits (like 0x3E8)
  * will be padded by leading zeros to reach 4 characters. No padding is done for larger
  * values.
- * @param buf A buffer of length 8 bytes, where the first two bytes are "\u".
+ * @param buf A buffer of length 10 bytes, where the first three bytes are "\u'".
  * @param codepoint Int representing a Unicode code point; must be a number in [0, 2^21).
- * @return The number of characters in the escape string. Will be 6, 7, or 8.
+ * @return The number of characters in the escape string. Will be 8, 9, or 10.
  */
 std::size_t construct_escape_string(unsigned char *buf, std::uint_fast32_t codepoint) {
     /*
@@ -67,12 +73,14 @@ std::size_t construct_escape_string(unsigned char *buf, std::uint_fast32_t codep
     if (codepoint < 0x1000u) { // If number is less than 4 chars, pad it
         stream << std::setfill('0') << std::setw(4);
     }
-    stream << std::hex << std::nouppercase << codepoint; // For the ordering of hex/nouppercase see this example: https://en.cppreference.com/w/cpp/io/manip/uppercase
+    stream << std::hex << std::uppercase << codepoint; // For the ordering of hex/uppercase see this example: https://en.cppreference.com/w/cpp/io/manip/uppercase
     // We can use the read method (basic_istream::read) to write the chars directly to buf
-    stream.read(reinterpret_cast<char *>(buf + 2), 6); // This tries to read 6 chars but will stop at EOF
+    stream.read(reinterpret_cast<char *>(buf + 3), 6); // This tries to read 6 chars but will stop at EOF
     auto num_chars_read = stream.gcount();
     assert(num_chars_read >= 4 && num_chars_read <= 6);
-    return static_cast<std::size_t>(num_chars_read + 2);
+    std::size_t idx_of_ending_singlequote = static_cast<std::size_t>(num_chars_read + 3);
+    buf[idx_of_ending_singlequote] = '\'';
+    return idx_of_ending_singlequote + 1;
 }
 
 int read_and_escape(const StreamPair& streams) {
@@ -103,12 +111,14 @@ int read_and_escape(const StreamPair& streams) {
     // system. The nasty type name is just a platform-independent way of saying uint64: https://en.cppreference.com/w/cpp/types/integer
     std::uint_fast64_t num_bytes_read = 0;
 
-    // This buffer will hold the 6-8 character strings for the escaped non-ASCII (or non-printable) chars.
-    unsigned char buf[8];
+    // This buffer will hold the 8-10 character strings for the escaped non-ASCII (or non-printable) chars.
+    unsigned char buf[10];
     buf[0] = '\\';
     buf[1] = 'u';
+    buf[2] = '\'';
     assert(buf[0] == 92);
     assert(buf[1] == 117);
+    assert(buf[2] == 39);
 
     unsigned char byte;
     for (streams.in->get(reinterpret_cast<char &>(byte)); streams.in->good() && streams.out->good(); streams.in->get(reinterpret_cast<char &>(byte))) {
@@ -146,7 +156,7 @@ int read_and_escape(const StreamPair& streams) {
             continue;
         }
         if (byte == 127) { // DEL, U+007F
-            streams.out->write("\\u007f", 6);
+            streams.out->write("\\u'007F'", 8);
             continue;
         }
         // Otherwise we're dealing with a multi-byte character.

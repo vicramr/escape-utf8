@@ -12,6 +12,6 @@
 
 #define MAJOR (0)
 #define MINOR (0)
-#define PATCH (0)
+#define PATCH (1)
 
 #endif //ESCAPE_UTF8_VERSION_H
