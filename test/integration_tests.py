@@ -33,3 +33,5 @@ if __name__ == "__main__":
         (stdout_data, stderr_data) = proc.communicate()
         assert stdout_data == b"lorem ipsum"
         assert stderr_data == b""
+
+    print("All integration tests passed!")
