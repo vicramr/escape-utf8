@@ -15,6 +15,7 @@ if __name__ == "__main__":
     if len(sys.argv) <= 1:
         sys.exit("You must give the path to the compiled 'escape' executable file as a command-line argument.")
     executable = sys.argv[1]
+    absolute_path_to_executable = os.path.realpath(executable)
 
     # To construct the path to the test cases, we can use sys.argv[0]. This code is repurposed from
     # another project of mine:
@@ -28,7 +29,7 @@ if __name__ == "__main__":
 
     # simple1
     simple1 = os.path.join(absolute_path_to_vcs_testcases, "simple1")
-    with Popen([executable, simple1], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+    with Popen([absolute_path_to_executable, simple1], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
         (stdout_data, stderr_data) = proc.communicate()
         assert stdout_data == b"lorem ipsum"
         assert stderr_data == b""
