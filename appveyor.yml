@@ -43,14 +43,8 @@ build_script:
 test_script:
   - ps: .\Debug\runtest.exe
   - ps: .\Release\runtest.exe
-  - ps: dir C:\Python35-x64
-  - ps: dir C:\Python35
-#  - ps: $env:path = "C:\;$env:path"
-#  - ps: Python35-x64 --version
-#  - ps: Python35-x64 ..\test\integration_tests.py .\Debug\escape.exe
-#  - ps: Python35-x64 ..\test\integration_tests.py .\Release\escape.exe
-# Note regarding Python:
-# I am adding the location of the Python executable to the PATH, as required
-# for miniconda: https://github.com/appveyor/ci/issues/359#issuecomment-131190900
-# Preinstalled Python executables are listed here:
+  - ps: C:\Python35-x64\python.exe --version
+  - ps: C:\Python35-x64\python.exe ..\test\integration_tests.py .\Debug\escape.exe
+  - ps: C:\Python35-x64\python.exe ..\test\integration_tests.py .\Release\escape.exe
+# Preinstalled Python locations are listed here:
 # https://www.appveyor.com/docs/windows-images-software/#python
