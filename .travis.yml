@@ -47,6 +47,7 @@ matrix:
         homebrew:
           packages:
             - python
+          update: true
     - name: "GCC 7 on macOS 10.14"
       os: osx
       osx_image: xcode11
