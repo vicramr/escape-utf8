@@ -12,7 +12,7 @@ import os
 from subprocess import Popen, PIPE
 
 if __name__ == "__main__":
-    if len(sys.argv <= 1):
+    if len(sys.argv) <= 1:
         sys.exit("You must give the path to the compiled 'escape' executable file as a command-line argument.")
     executable = sys.argv[1]
 
