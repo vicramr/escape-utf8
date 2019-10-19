@@ -27,9 +27,9 @@ int main(int argc, char *argv[]) {
         StreamPair streams = parse(argc, argv);
         int retval = read_and_escape(streams);
         return retval;
-    } catch (const EarlyFinish& e) {
+    } catch (const EarlyFinish&) {
         return 0;
-    } catch (const FileError& e) {
+    } catch (const FileError&) {
         return 1;
     }
 }
