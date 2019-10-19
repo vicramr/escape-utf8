@@ -65,13 +65,23 @@ before_install:
   - $CXX --version
   - cmake --version
   - make --version
+  - python3 --version
+  - python --version
 
 # For 'language: cpp' there is no install phase: https://docs.travis-ci.com/user/languages/cpp/#dependency-management
 # That's fine because we've already taken care of dependencies above.
 
 script:
-  - mkdir build
-  - cd build
-  - cmake ..
-  - cmake --build . --target runtest
+  - mkdir debug
+  - cd debug
+  - cmake .. -DCMAKE_BUILD_TYPE=Debug
+  - cmake --build . --target all
   - ./runtest
+  - python3 ../test/integration_tests.py escape
+  - cd ..
+  - mkdir release
+  - cd release
+  - cmake .. -DCMAKE_BUILD_TYPE=Release
+  - cmake --build . --target all
+  - ./runtest
+  - python3 ../test/integration_tests.py escape
