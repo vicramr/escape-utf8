@@ -25,29 +25,7 @@ matrix:
       compiler: clang
 # For the mac builds, info about installing GCC is from here: https://docs.travis-ci.com/user/installing-dependencies/#installing-packages-on-macos
 # Likewise, info for clang is from here: https://docs.travis-ci.com/user/languages/cpp/#clang-on-macos
-# Info for Python is from here: https://docs.brew.sh/Homebrew-and-Python
-    - name: "GCC 5 on macOS 10.12"
-      os: osx
-      osx_image: xcode9.2
-      addons:
-        homebrew:
-          packages:
-            - gcc5
-            - python
-          update: true
-      env:
-        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-# NOTE: The gcc5 build outputs lots of warnings like the ones in this SO question: https://stackoverflow.com/q/39865367
-# An answerer says it's nothing to worry about.
-    - name: "Clang on macOS 10.12"
-      os: osx
-      osx_image: xcode9.2
-      compiler: clang
-      addons:
-        homebrew:
-          packages:
-            - python
-          update: true
+# macOS 10.14 should have a sufficient version of Python installed already.
     - name: "GCC 7 on macOS 10.14"
       os: osx
       osx_image: xcode11
@@ -81,13 +59,13 @@ script:
   - mkdir debug
   - cd debug
   - cmake .. -DCMAKE_BUILD_TYPE=Debug
-  - cmake --build . --target all
+  - cmake --build . --target all --verbose
   - ./runtest
   - python3 ../test/integration_tests.py escape
   - cd ..
   - mkdir release
   - cd release
   - cmake .. -DCMAKE_BUILD_TYPE=Release
-  - cmake --build . --target all
+  - cmake --build . --target all --verbose
   - ./runtest
   - python3 ../test/integration_tests.py escape

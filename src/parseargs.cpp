@@ -155,7 +155,7 @@ std::bitset<3> parse_helper(int argc, char **argv, std::string& inputfile, std::
     std::bitset<3> bits;
     assert(!bits.any()); // By default, all bits are set to 0
     if (argc > 4) {
-        // 4 is the highest that argc can every be for a valid invocation.
+        // 4 is the highest that argc can ever be for a valid invocation.
         // So here we return "help" and "invalid".
         bits.set(0);
         return bits;

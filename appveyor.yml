@@ -37,8 +37,8 @@ build_script:
   - ps: md build
   - ps: cd build
   - ps: cmake .. -G "$env:GENERATOR" -DCMAKE_CONFIGURATION_TYPES="Debug;Release"
-  - ps: cmake --build . --config Debug
-  - ps: cmake --build . --config Release
+  - ps: cmake --build . --config Debug --verbose
+  - ps: cmake --build . --config Release --verbose
 
 test_script:
   - ps: .\Debug\runtest.exe
