@@ -28,10 +28,17 @@ if __name__ == "__main__":
     absolute_path_to_vcs_testcases = os.path.join(absolute_path_to_test, "vcs_testcases")
 
     # simple1
-    simple1 = os.path.join(absolute_path_to_vcs_testcases, "simple1")
+    simple1 = os.path.join(absolute_path_to_vcs_testcases, "simple1.txt")
     with Popen([absolute_path_to_executable, simple1], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
         (stdout_data, stderr_data) = proc.communicate()
-        assert stdout_data == b"lorem ipsum"
-        assert stderr_data == b""
+        assert stdout_data == br"lorem ipsum"
+        assert stderr_data == br""
+
+    # joy
+    joy = os.path.join(absolute_path_to_vcs_testcases, "joy.txt")
+    with Popen([absolute_path_to_executable, joy], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert stdout_data == br"\u'1F602'\u'1F602'"
+        assert stderr_data == br""
 
     print("All integration tests passed!")

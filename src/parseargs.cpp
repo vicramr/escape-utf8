@@ -186,7 +186,7 @@ std::bitset<3> parse_helper(int argc, char **argv, std::string& inputfile, std::
 
             bits.set(2);
             return bits;
-        } else if (i == 1) {
+        } else if (i == 1) { // TODO I believe this is the part where the bad logic triggers. We need to check for argv[1] being --output as well.
             // This means argv[1] is "-o" and argv[2] should be interpreted as OUTPUTFILE.
             outputfile.assign(argv[2]);
             // We don't assign inputfile, to denote it wasn't specified.
