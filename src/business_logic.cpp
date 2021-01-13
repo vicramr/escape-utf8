@@ -149,9 +149,10 @@ int read_and_escape(const StreamPair& streams) {
         ++num_bytes_read; // Mark the byte as read (we have to check good() first)
 
         // First, we'll check if the character is printable. This includes 33-126
-        // (all normal graphical characters) plus 9 (tab), 10 (line feed), and 32 (space).
+        // (all normal graphical characters) plus 9 (tab), 10 (line feed),
+        // 13 (carriage return), and 32 (space).
         // These numbers are all in decimal.
-        if ((32 <= byte && byte <= 126) || byte == 9 || byte == 10) {
+        if ((32 <= byte && byte <= 126) || byte == 9 || byte == 10 || byte == 13) {
             streams.out->put(byte);
             continue;
         }
