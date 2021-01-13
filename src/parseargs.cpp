@@ -186,8 +186,8 @@ std::bitset<3> parse_helper(int argc, char **argv, std::string& inputfile, std::
 
             bits.set(2);
             return bits;
-        } else if (i == 1) { // TODO I believe this is the part where the bad logic triggers. We need to check for argv[1] being --output as well.
-            // This means argv[1] is "-o" and argv[2] should be interpreted as OUTPUTFILE.
+        } else if (i == 1) {
+            // This means argv[1] is "-o" or "--output" and argv[2] should be interpreted as OUTPUTFILE.
             outputfile.assign(argv[2]);
             // We don't assign inputfile, to denote it wasn't specified.
             bits.set(2);
@@ -247,7 +247,7 @@ std::bitset<3> parse_helper(int argc, char **argv, std::string& inputfile, std::
  * first character beyond the prefix. This will either be 2 (for a prefix of "-o"),
  * or 9 (for a prefix of "--output=").
  * Otherwise:
- *   If arg is "-o", returns 1.
+ *   If arg is "-o" or "--output", returns 1.
  *   Else if arg is "--output=", returns 0.
  *   Else, returns -1.
  */
@@ -256,6 +256,8 @@ int check_output_option(const char *arg) {
         return strlen_atleast(arg, 3) ? 2 : 1;
     } else if (!std::strncmp(arg, "--output=", 9)) {
         return strlen_atleast(arg, 10) ? 9 : 0;
+    } else if (arg == std::string("--output")) {
+        return 1;
     } else {
         return -1;
     }

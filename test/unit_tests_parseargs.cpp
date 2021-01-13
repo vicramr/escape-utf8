@@ -37,7 +37,7 @@ TEST_CASE("Test check_output_option", "[check_output_option]") {
     REQUIRE(check_output_option("--output=\n") == 9);
     REQUIRE(check_output_option("") == -1);
     REQUIRE(check_output_option("-O") == -1);
-    REQUIRE(check_output_option("--output") == -1);
+    REQUIRE(check_output_option("--output") == 1);
     REQUIRE(check_output_option("-\no") == -1);
     REQUIRE(check_output_option("foo") == -1);
 }
