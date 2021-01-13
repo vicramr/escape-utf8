@@ -2,6 +2,9 @@
 This file contains integration tests. To test the program end-to-end, we use subprocess.Popen
 to run the compiled program with various file/text inputs and check that every byte of the output
 is exactly as expected (both std/file output and stderr).
+
+NOTE: this program will create new files in the current directory, potentially overwriting
+existing files. Be careful!
 """
 
 import sys
@@ -32,13 +35,48 @@ if __name__ == "__main__":
     with Popen([absolute_path_to_executable, simple1], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
         (stdout_data, stderr_data) = proc.communicate()
         assert stdout_data == br"lorem ipsum"
-        assert stderr_data == br""
+        assert stderr_data == b""
 
     # joy
     joy = os.path.join(absolute_path_to_vcs_testcases, "joy")
     with Popen([absolute_path_to_executable, joy], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
         (stdout_data, stderr_data) = proc.communicate()
         assert stdout_data == br"\u'1F602'\u'1F602'"
-        assert stderr_data == br""
+        assert stderr_data == b""
+
+    # Test ASCII control characters
+    with Popen([absolute_path_to_executable], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate(b"\x00")
+        assert stdout_data == br"\u'0000'"
+        assert stderr_data == b""
+
+    with Popen([absolute_path_to_executable], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate(b"foo \x01bar\r\n\x08\x09\x0A\x0B\x0C\x0D\n\x1F\x20\x7E\x7F")
+        # tab is 09, LF is 0A, CR is 0D, space is 20, tilde is 7E, DEL is 7F
+        out = b"foo \\u'0001'bar\r\n\\u'0008'\t\n\\u'000B'\\u'000C'\r\n\\u'001F' ~\\u'007F'"
+        assert stdout_data == out
+        assert stderr_data == b""
+
+    with Popen([absolute_path_to_executable, "--output", "control1"], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate(b"foo \x01bar\r\n\x08\x09\x0A\x0B\x0C\x0D\n\x1F\x20\x7E\x7F")
+        out = b"foo \\u'0001'bar\r\n\\u'0008'\t\n\\u'000B'\\u'000C'\r\n\\u'001F' ~\\u'007F'"
+        assert stdout_data == b""
+        assert stderr_data == b""
+        with open("control1", mode="rb") as f:
+            control1_data = f.read()
+            assert control1_data == out
+
+    # crlf
+    crlf = os.path.join(absolute_path_to_vcs_testcases, "crlf")
+    out = b"This is a plain old ASCII file with CRLF\r\nline endings. Lorem\r\nipsum\r\n"
+    with Popen([absolute_path_to_executable, "-ocrlf1", crlf], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert stdout_data == b""
+        assert stderr_data == b""
+        with open("crlf1", mode="rb") as f:
+            crlf1_data = f.read()
+            assert crlf1_data == out
+
+
 
     print("All integration tests passed!")

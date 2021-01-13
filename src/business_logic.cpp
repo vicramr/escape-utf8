@@ -160,7 +160,13 @@ int read_and_escape(const StreamPair& streams) {
             streams.out->write("\\u'007F'", 8);
             continue;
         }
+        if (byte <= 31) { // US-ASCII control character. We must escape this.
+            std::size_t buflen = construct_escape_string(buf, byte);
+            streams.out->write(reinterpret_cast<char *>(buf), buflen);
+            continue;
+        }
         // Otherwise we're dealing with a multi-byte character.
+        assert(byte > 127);
 
         // This will store the decoded character's actual numerical value. We need an int
         // that's at least 21 bits wide.
