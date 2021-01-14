@@ -1,10 +1,15 @@
 """
+NOTE: this program will create new files in the current directory, potentially overwriting
+existing files. Be careful!
+
 This file contains integration tests. To test the program end-to-end, we use subprocess.Popen
 to run the compiled program with various file/text inputs and check that every byte of the output
 is exactly as expected (both std/file output and stderr).
 
-NOTE: this program will create new files in the current directory, potentially overwriting
-existing files. Be careful!
+Unfortunately, because the cin/cout streams are opened in text mode by default, it is hard
+to write byte-for-byte tests that use stdin or stdout. That's because line endings will be
+altered by cin/cout on Windows but not on Unix-like systems. The workaround is to specify
+both an input and output file for any test cases that involve line endings.
 """
 
 import sys
@@ -29,12 +34,13 @@ if __name__ == "__main__":
     absolute_path_to_file = os.path.realpath(arg0)
     absolute_path_to_test = os.path.dirname(absolute_path_to_file)
     absolute_path_to_vcs_testcases = os.path.join(absolute_path_to_test, "vcs_testcases")
+    absolute_path_to_gen = os.path.join(absolute_path_to_vcs_testcases, "gen")
 
     # simple1
     simple1 = os.path.join(absolute_path_to_vcs_testcases, "simple1")
     with Popen([absolute_path_to_executable, simple1], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
         (stdout_data, stderr_data) = proc.communicate()
-        assert stdout_data == br"lorem ipsum"
+        assert stdout_data == b"lorem ipsum"
         assert stderr_data == b""
 
     # joy
@@ -50,16 +56,10 @@ if __name__ == "__main__":
         assert stdout_data == br"\u'0000'"
         assert stderr_data == b""
 
-    with Popen([absolute_path_to_executable], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
-        (stdout_data, stderr_data) = proc.communicate(b"foo \x01bar\r\n\x08\x09\x0A\x0B\x0C\x0D\n\x1F\x20\x7E\x7F")
-        # tab is 09, LF is 0A, CR is 0D, space is 20, tilde is 7E, DEL is 7F
-        out = b"foo \\u'0001'bar\r\n\\u'0008'\t\n\\u'000B'\\u'000C'\r\n\\u'001F' ~\\u'007F'"
-        assert stdout_data == out
-        assert stderr_data == b""
-
-    with Popen([absolute_path_to_executable, "--output", "control1"], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
-        (stdout_data, stderr_data) = proc.communicate(b"foo \x01bar\r\n\x08\x09\x0A\x0B\x0C\x0D\n\x1F\x20\x7E\x7F")
-        out = b"foo \\u'0001'bar\r\n\\u'0008'\t\n\\u'000B'\\u'000C'\r\n\\u'001F' ~\\u'007F'"
+    control = os.path.join(absolute_path_to_gen, "control")
+    out = b"foo \\u'0001'bar\r\n\\u'0008'\t\n\\u'000B'\\u'000C'\r\n\\u'001F' ~\\u'007F'"
+    with Popen([absolute_path_to_executable, "--output", "control1", control], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
         assert stdout_data == b""
         assert stderr_data == b""
         with open("control1", mode="rb") as f:
