@@ -18,6 +18,7 @@ if (sys.version_info[0] < 3) or (sys.version_info[0] == 3 and sys.version_info[1
 
 import os
 from subprocess import Popen, PIPE
+from codecs import encode
 
 if __name__ == "__main__":
     if len(sys.argv) <= 1:
@@ -105,6 +106,25 @@ if __name__ == "__main__":
             hearteyes2_data = f.read()
             assert hearteyes2_data == out
 
+    # holamundo
+    holamundo = os.path.join(absolute_path_to_gen, "holamundo")
+    out = b"\\u'00A1'Hola mundo!\n"
+    with Popen([absolute_path_to_executable, holamundo, "-o", "holamundo1"], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode == 0
+        assert stdout_data == b""
+        assert stderr_data == b""
+        with open("holamundo1", mode="rb") as f:
+            holamundo1_data = f.read()
+            assert holamundo1_data == out
+
+    # Latin-1: various characters from the Latin-1 block.
+    with Popen([absolute_path_to_executable], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        input_bytes = encode("\t\u0080 \u00B1Hi World\u00A2  \u00F7\u00FF\t ", encoding="utf8")
+        (stdout_data, stderr_data) = proc.communicate(input_bytes)
+        assert proc.returncode == 0
+        assert stdout_data == b"\t\\u'0080' \\u'00B1'Hi World\\u'00A2'  \\u'00F7'\\u'00FF'\t "
+        assert stderr_data == b""
 
     # Nonexistent input file (note, we're opening the streams in text mode here!)
     with Popen([absolute_path_to_executable, "NonExistentFileName"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
