@@ -72,16 +72,16 @@ class Escape {
             inputfile = nonoptions.get(0);
         } else {
             assert nonoptions.size() == 0;
-            inputfile = "no input file given";
+            inputfile = null;
         }
 
         if (cmd.hasOption("output")) {
             outputfile = cmd.getOptionValue("output");
         } else {
-            outputfile = "no output file given";
+            outputfile = null;
         }
 
-        System.out.println("Input file: " + inputfile);
-        System.out.println("Output file: " + outputfile);
+        int exitcode = BusinessLogic.run(inputfile, outputfile);
+        System.exit(exitcode);
     }
 }
