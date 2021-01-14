@@ -66,6 +66,7 @@ if __name__ == "__main__":
             control1_data = f.read()
             assert control1_data == out
 
+
     # crlf
     crlf = os.path.join(absolute_path_to_vcs_testcases, "crlf")
     out = b"This is a plain old ASCII file with CRLF\r\nline endings. Lorem\r\nipsum\r\n"
@@ -77,6 +78,24 @@ if __name__ == "__main__":
             crlf1_data = f.read()
             assert crlf1_data == out
 
+    # hearteyes
+    hearteyes = os.path.join(absolute_path_to_vcs_testcases, "hearteyes")
+    out = b"\\u'1F60D'\\u'1F60D' \\u'1F60D'  \\u'1F60D'\n"
+    with Popen([absolute_path_to_executable, "--output=hearteyes1", hearteyes], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert stdout_data == b""
+        assert stderr_data == b""
+        with open("hearteyes1", mode="rb") as f:
+            hearteyes1_data = f.read()
+            assert hearteyes1_data == out
+
+    with Popen([absolute_path_to_executable, hearteyes, "--output", "hearteyes2"], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert stdout_data == b""
+        assert stderr_data == b""
+        with open("hearteyes2", mode="rb") as f:
+            hearteyes2_data = f.read()
+            assert hearteyes2_data == out
 
 
     print("All integration tests passed!")

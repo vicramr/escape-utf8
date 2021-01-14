@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <ios> // for ios_base::binary
 
 #include "StreamPair.h"
 
@@ -27,6 +28,20 @@
  *   It looks like constructing ifstream/ofstream can only fail if the file cannot
  *   be opened. If that happens, then the failbit is set; see here (we're using constructor 4):
  *   https://en.cppreference.com/w/cpp/io/basic_ifstream/basic_ifstream
+ *
+ * Binary Mode:
+ *   By default, it seems that ifstream/ofstream are opened in text mode. Details for
+ *   text mode are here: https://en.cppreference.com/w/cpp/io/c/FILE#Binary_and_text_modes
+ *   This doesn't matter for POSIX systems but it does for Windows. On Windows, CRLF
+ *   will be converted to LF on input and vice versa for output.
+ *   The docs for the constructors for basic_ifstream and basic_ofstream discuss how
+ *   to add the mode arg. There is also some relevant documentation from Microsoft:
+ *   https://docs.microsoft.com/en-us/cpp/standard-library/binary-output-files?view=msvc-160
+ *
+ *   NOTE: std::cin and std::cout are opened in text mode! And according to SO, there
+ *   is not a platform-independent way to change that: https://stackoverflow.com/a/7587701
+ *   In other words, on Windows this program does not function 100% correctly unless
+ *   the user gives a filename for both input and output.
  */
 
 auto deleter = [](auto){}; // parameter name omitted to silence "unused parameter" warnings
@@ -46,21 +61,21 @@ void StreamPair::check_out(const std::string &outputfile) {
 }
 
 StreamPair::StreamPair(const std::string &inputfile, const std::string &outputfile) : 
-    in(new std::ifstream(inputfile)), 
-    out(new std::ofstream(outputfile)) {
+    in(new std::ifstream(inputfile, std::ios_base::binary)),
+    out(new std::ofstream(outputfile, std::ios_base::binary)) {
         check_in(inputfile);
         check_out(outputfile);
 }
 
 StreamPair::StreamPair(const std::string &inputfile, bool) : 
-    in(new std::ifstream(inputfile)), 
+    in(new std::ifstream(inputfile, std::ios_base::binary)),
     out(&std::cout, deleter) {
         check_in(inputfile);
 }
 
 StreamPair::StreamPair(bool, const std::string &outputfile) :
     in(&std::cin, deleter),
-    out(new std::ofstream(outputfile)) {
+    out(new std::ofstream(outputfile, std::ios_base::binary)) {
         check_out(outputfile);
 }
 
