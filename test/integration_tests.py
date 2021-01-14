@@ -40,6 +40,7 @@ if __name__ == "__main__":
     simple1 = os.path.join(absolute_path_to_vcs_testcases, "simple1")
     with Popen([absolute_path_to_executable, simple1], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
         (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode == 0
         assert stdout_data == b"lorem ipsum"
         assert stderr_data == b""
 
@@ -47,12 +48,14 @@ if __name__ == "__main__":
     joy = os.path.join(absolute_path_to_vcs_testcases, "joy")
     with Popen([absolute_path_to_executable, joy], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
         (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode == 0
         assert stdout_data == br"\u'1F602'\u'1F602'"
         assert stderr_data == b""
 
     # Test ASCII control characters
     with Popen([absolute_path_to_executable], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
         (stdout_data, stderr_data) = proc.communicate(b"\x00")
+        assert proc.returncode == 0
         assert stdout_data == br"\u'0000'"
         assert stderr_data == b""
 
@@ -60,6 +63,7 @@ if __name__ == "__main__":
     out = b"foo \\u'0001'bar\r\n\\u'0008'\t\n\\u'000B'\\u'000C'\r\n\\u'001F' ~\\u'007F'"
     with Popen([absolute_path_to_executable, "--output", "control1", control], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
         (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode == 0
         assert stdout_data == b""
         assert stderr_data == b""
         with open("control1", mode="rb") as f:
@@ -72,6 +76,7 @@ if __name__ == "__main__":
     out = b"This is a plain old ASCII file with CRLF\r\nline endings. Lorem\r\nipsum\r\n"
     with Popen([absolute_path_to_executable, "-ocrlf1", crlf], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
         (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode == 0
         assert stdout_data == b""
         assert stderr_data == b""
         with open("crlf1", mode="rb") as f:
@@ -83,19 +88,30 @@ if __name__ == "__main__":
     out = b"\\u'1F60D'\\u'1F60D' \\u'1F60D'  \\u'1F60D'\n"
     with Popen([absolute_path_to_executable, "--output=hearteyes1", hearteyes], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
         (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode == 0
         assert stdout_data == b""
         assert stderr_data == b""
         with open("hearteyes1", mode="rb") as f:
             hearteyes1_data = f.read()
             assert hearteyes1_data == out
 
+    # hearteyes, with slightly different command line
     with Popen([absolute_path_to_executable, hearteyes, "--output", "hearteyes2"], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
         (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode == 0
         assert stdout_data == b""
         assert stderr_data == b""
         with open("hearteyes2", mode="rb") as f:
             hearteyes2_data = f.read()
             assert hearteyes2_data == out
+
+
+    # Nonexistent input file (note, we're opening the streams in text mode here!)
+    with Popen([absolute_path_to_executable, "NonExistentFileName"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode != 0
+        assert stdout_data == ""
+        assert stderr_data == 'Failed to open input file "NonExistentFileName". Exiting now.\n'
 
 
     print("All integration tests passed!")
