@@ -12,7 +12,14 @@ if __name__ == "__main__":
     print("Wrote control successfully")
 
     # holamundo: tests handling of a 2-byte codepoint
-    with open("holamundo", mode="w", encoding="utf8", newline='\n') as f:
+    with open("holamundo", mode="w", encoding="utf8", newline="\n") as f:
         numchars = f.write("\u00A1Hola mundo!\n")
         assert numchars == 13
     print("Wrote holamundo successfully")
+
+    # shortmix: short file with 1, 2, 3, and 4-byte codepoints
+    with open("shortmix", mode="w", encoding="utf8", newline="\r\n") as f:
+        # 10904 is a Phoenician symbol.
+        numchars = f.write("\u2020 \u0007\n\U00010904\uFE18\u042F\n\n")
+        assert numchars == 9
+    print("Wrote shortmix successfully")

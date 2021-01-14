@@ -126,6 +126,19 @@ if __name__ == "__main__":
         assert stdout_data == b"\t\\u'0080' \\u'00B1'Hi World\\u'00A2'  \\u'00F7'\\u'00FF'\t "
         assert stderr_data == b""
 
+    # shortmix
+    shortmix = os.path.join(absolute_path_to_gen, "shortmix")
+    out = b"\\u'2020' \\u'0007'\r\n\\u'10904'\\u'FE18'\\u'042F'\r\n\r\n"
+    with Popen([absolute_path_to_executable, "-o", "shortmix1", shortmix], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode == 0
+        assert stdout_data == b""
+        assert stderr_data == b""
+        with open("shortmix1", mode="rb") as f:
+            shortmix1_data = f.read()
+            assert shortmix1_data == out
+        print('passed shortmix')
+
     # Nonexistent input file (note, we're opening the streams in text mode here!)
     with Popen([absolute_path_to_executable, "NonExistentFileName"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
         (stdout_data, stderr_data) = proc.communicate()
