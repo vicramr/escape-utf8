@@ -153,5 +153,16 @@ if __name__ == "__main__":
         assert stdout_data == ""
         assert stderr_data == "The given text is not valid UTF-8 text. Exiting now.\n"
 
+    # bad4byte
+    bad4byte = os.path.join(absolute_path_to_gen, "bad4byte")
+    with Popen([absolute_path_to_executable, bad4byte, "-obad4byte1"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode != 0
+        assert stdout_data == ""
+        assert stderr_data == "The given text is not valid UTF-8 text. Exiting now.\n"
+        with open("bad4byte1", mode="rb") as f:
+            bad4byte1_data = f.read()
+            assert bad4byte1_data == b"\\u'1F0A1'"
+
 
     print("All integration tests passed!")

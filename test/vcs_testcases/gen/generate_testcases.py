@@ -2,6 +2,7 @@
 This program is used to create the test cases in the gen directory.
 You must run this script with Python 3.
 """
+from codecs import encode
 
 if __name__ == "__main__":
     # control: tests escaping of ASCII control characters
@@ -29,3 +30,11 @@ if __name__ == "__main__":
         numbytes = f.write(b"\xFF")
         assert numbytes == 1
     print("Wrote 255 successfully")
+
+    # bad4byte: malformed file with a 4-byte codepoint that encodes a value of 0
+    with open("bad4byte", mode="wb") as f:
+        numbytes = f.write(encode("\U0001F0A1", encoding="utf8"))
+        assert numbytes == 4
+        numbytes = f.write(b"\xF0\x80\x80\x80foo bar")
+        assert numbytes == 11
+    print("Wrote bad4byte successfully")
