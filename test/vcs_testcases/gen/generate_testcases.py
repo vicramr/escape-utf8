@@ -23,3 +23,9 @@ if __name__ == "__main__":
         numchars = f.write("\u2020 \u0007\n\U00010904\uFE18\u042F\n\n")
         assert numchars == 9
     print("Wrote shortmix successfully")
+
+    # 255: malformed file with a single byte of value 255
+    with open("255", mode="wb") as f:
+        numbytes = f.write(b"\xFF")
+        assert numbytes == 1
+    print("Wrote 255 successfully")

@@ -137,7 +137,6 @@ if __name__ == "__main__":
         with open("shortmix1", mode="rb") as f:
             shortmix1_data = f.read()
             assert shortmix1_data == out
-        print('passed shortmix')
 
     # Nonexistent input file (note, we're opening the streams in text mode here!)
     with Popen([absolute_path_to_executable, "NonExistentFileName"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
@@ -145,6 +144,14 @@ if __name__ == "__main__":
         assert proc.returncode != 0
         assert stdout_data == ""
         assert stderr_data == 'Failed to open input file "NonExistentFileName". Exiting now.\n'
+
+    # 255
+    file255 = os.path.join(absolute_path_to_gen, "255")
+    with Popen([absolute_path_to_executable, file255], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode != 0
+        assert stdout_data == ""
+        assert stderr_data == "The given text is not valid UTF-8 text. Exiting now.\n"
 
 
     print("All integration tests passed!")
