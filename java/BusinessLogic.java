@@ -24,7 +24,7 @@ class BusinessLogic {
             return 1;
         } catch (IOException e) {
             // See StreamPair docstring for info on when this can happen.
-            System.err.println("Failed to open output file \"" + outputfile + "\". Exiting now.");
+            System.err.println("Failed to open output file \"" + outputfile + "\". Also encountered error when closing input file. Exiting now.");
             return 1;
         }
         // TODO: use the streams to read and escape
