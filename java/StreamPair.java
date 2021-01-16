@@ -3,11 +3,13 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * This class encapsulates the input and output streams.
@@ -46,7 +48,7 @@ class StreamPair {
                 Path path = Paths.get(inputfile);
                 instream = Files.newInputStream(path);
             } catch (InvalidPathException | IOException | SecurityException e) {
-                assert instream == null;
+                assert instream == null; // TODO is it possible for this to be non-null here?
                 // We could print out a more detailed error message, but this is identical
                 // to the message printed by the C++ implementation.
                 throw new StreamPairException("Failed to open input file \"" + inputfile + "\". Exiting now.");
@@ -72,7 +74,11 @@ class StreamPair {
                 }
                 throw new StreamPairException("Failed to open output file \"" + outputfile + "\". Exiting now.");
             }
-            out = new PrintStream(outstream);
+            try {
+                out = new PrintStream(outstream, false, StandardCharsets.US_ASCII.name());
+            } catch (UnsupportedEncodingException e) {
+                assert false; // US_ASCII is guaranteed to be supported by any implementation of the JVM.
+            }
         }
     }
 

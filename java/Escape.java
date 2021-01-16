@@ -1,3 +1,8 @@
+/**
+ * This is the class with the main method. The main logic here is to
+ * parse the command-line arguments.
+ */
+
 import java.util.List;
 
 import org.apache.commons.cli.Options;
