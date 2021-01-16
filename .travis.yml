@@ -19,24 +19,7 @@ matrix:
       os: linux
       dist: bionic
       compiler: clang
-# For the mac builds, info about installing GCC is from here: https://docs.travis-ci.com/user/installing-dependencies/#installing-packages-on-macos
-# Likewise, info for clang is from here: https://docs.travis-ci.com/user/languages/cpp/#clang-on-macos
-# macOS 10.14 or newer should have a sufficient version of Python installed already.
-    - name: "GCC 9 on macOS 10.15"
-      os: osx
-      osx_image: xcode12.2
-      addons:
-        homebrew:
-          packages:
-            - gcc@9
-      env:
-        - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
-    - name: "AppleClang 11 on macOS 10.14"
-      os: osx
-      osx_image: xcode11
-      compiler: clang
-# The following build is the only one that runs tests for Java. It also runs all the normal tests.
-    - name: "GCC 7.5.0 and Java on Bionic (18.04 LTS)"
+    - name: "GCC 7.5.0 and Java 8 on Bionic (18.04 LTS)"
       os: linux
       dist: bionic
       language: java
@@ -44,6 +27,31 @@ matrix:
       env:
         - MATRIX_EVAL="CC=gcc && CXX=g++"  # This is not actually useful, but we print these vars in before_install.
         - USING_JAVA  # We don't check the value, only whether the var is set
+# For the mac builds, info about installing GCC is from here: https://docs.travis-ci.com/user/installing-dependencies/#installing-packages-on-macos
+# Likewise, info for clang is from here: https://docs.travis-ci.com/user/languages/cpp/#clang-on-macos
+# macOS 10.14 or newer should have a sufficient version of Python installed already.
+    - name: "AppleClang 11 on macOS 10.14"
+      os: osx
+      osx_image: xcode11
+      compiler: clang
+    - name: "GCC 9 and Java 8 on macOS 10.15"
+      os: osx
+      osx_image: xcode12.2
+      addons:
+        homebrew:
+          packages:
+            - gcc@9
+          taps:
+            - AdoptOpenJDK/openjdk
+          casks:
+            - adoptopenjdk8
+      env:
+        - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
+        - USING_JAVA
+# Info about installing openjdk 8 for macos is from these sources:
+# https://docs.travis-ci.com/user/installing-dependencies/#installing-from-taps
+# https://stackoverflow.com/a/55835094
+# https://github.com/AdoptOpenJDK/homebrew-openjdk
 
 
 before_install:
