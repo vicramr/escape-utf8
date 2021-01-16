@@ -21,17 +21,16 @@ matrix:
       compiler: clang
 # For the mac builds, info about installing GCC is from here: https://docs.travis-ci.com/user/installing-dependencies/#installing-packages-on-macos
 # Likewise, info for clang is from here: https://docs.travis-ci.com/user/languages/cpp/#clang-on-macos
-# macOS 10.14 should have a sufficient version of Python installed already.
-    - name: "GCC 7 on macOS 10.14"
+# macOS 10.14 or newer should have a sufficient version of Python installed already.
+    - name: "GCC 9 on macOS 10.15"
       os: osx
-      osx_image: xcode11
+      osx_image: xcode12.2
       addons:
         homebrew:
           packages:
-            - gcc@7
-          update: true
+            - gcc@9
       env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
     - name: "AppleClang 11 on macOS 10.14"
       os: osx
       osx_image: xcode11
@@ -61,6 +60,7 @@ before_install:
 # That's fine because we've already taken care of dependencies above.
 
 script:
+  - echo "CC and CXX:" $CC $CXX
   - mkdir debug
   - cd debug
   - cmake .. -DCMAKE_BUILD_TYPE=Debug

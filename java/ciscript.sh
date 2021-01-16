@@ -1,5 +1,6 @@
 #!/bin/bash
 # This script is used in .travis.yml to run the integration tests on the Java code.
+# It assumes that the current working directory is the root dir of the repo.
 
 set -e # This is important to stop the script if the checksum doesn't match.
 echo 'Running integration tests for Java'
