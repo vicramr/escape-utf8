@@ -15,7 +15,7 @@ matrix:
       os: linux
       dist: xenial
       compiler: clang
-    - name: "GCC 7.4.0 on Bionic (18.04 LTS)"
+    - name: "GCC 7.5.0 on Bionic (18.04 LTS)"
       os: linux
       dist: bionic
       compiler: gcc
@@ -41,20 +41,21 @@ matrix:
       osx_image: xcode11
       compiler: clang
 # The following build is the only one that runs tests for Java. It also runs all the normal tests.
-# Instructions for installing GCC on linux: https://docs.travis-ci.com/user/languages/cpp/#gcc-on-linux
-    - name: "GCC 8 and Java on Bionic (18.04 LTS)"
+# Instructions for installing GCC/Clang on linux: https://docs.travis-ci.com/user/languages/cpp/#gcc-on-linux
+    - name: "Clang 10 and Java on Bionic (18.04 LTS)"
       os: linux
       dist: bionic
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - llvm-toolchain-bionic-10
           packages:
-            - g++-8
+            - clang-10
       language: java
       jdk: openjdk8
       env:
-        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+        - MATRIX_EVAL="CC=clang-10 && CXX=clang++-10"
         - USING_JAVA  # We don't check the value, only whether the var is set
 
 
