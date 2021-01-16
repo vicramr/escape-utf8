@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -e # This is important to stop the script if the checksum doesn't match.
 echo 'Running integration tests for Java'
 echo 'java version:'
 java -version

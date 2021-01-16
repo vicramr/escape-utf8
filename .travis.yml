@@ -78,5 +78,6 @@ script:
   - cmake --build . --target all
   - ./runtest
   - python3 ../test/integration_tests.py escape
-  - if [ -z ${USING_JAVA+foo} ]; then ./java/ciscript.sh; else echo 'Not running Java tests'; fi
+  - cd ..
+  - if [ -z ${USING_JAVA+foo} ]; then echo 'Not running Java tests'; else ./java/ciscript.sh; fi
 # The line to check for USING_JAVA is modified from here: https://stackoverflow.com/a/13864829
