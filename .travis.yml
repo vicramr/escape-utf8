@@ -32,7 +32,7 @@ matrix:
           update: true
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-    - name: "Clang on macOS 10.14"
+    - name: "AppleClang 11 on macOS 10.14"
       os: osx
       osx_image: xcode11
       compiler: clang
@@ -43,6 +43,7 @@ matrix:
       language: java
       jdk: openjdk8
       env:
+        - MATRIX_EVAL="CC=gcc && CXX=g++"  # This is not actually useful, but we print these vars in before_install.
         - USING_JAVA  # We don't check the value, only whether the var is set
 
 
