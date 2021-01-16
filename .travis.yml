@@ -45,7 +45,7 @@ matrix:
       os: linux
       dist: focal
       language: java
-      jdk: openjdk8
+      jdk: oraclejdk8
       env:
         - MATRIX_EVAL="CC=gcc && CXX=g++"
         - USING_JAVA  # We don't check the value, only whether the var is set
