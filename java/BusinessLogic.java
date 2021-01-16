@@ -145,6 +145,9 @@ class BusinessLogic {
      * a valid first byte of a multibyte UTF-8 character then this method returns -1.
      */
     private static int getLen(int octet) {
+        // Implementation note: these comparisons are valid because binary literals
+        // still have type int. These would fail if the binary literals were bytes,
+        // because the byte type is signed.
         assert 0 <= octet && octet <= 255;
         if ((octet & 0b11100000) == 0b11000000) {
             return 2;

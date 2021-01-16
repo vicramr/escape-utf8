@@ -53,7 +53,7 @@
  * sequence.
  *
  * For example, given the code point 1000 (hex value 0x3E8) this function would write to the
- * buffer "\u'03E8'". All letters will be uppercase.
+ * buffer "\u'03E8'". All letters will be uppercase except the "u" at the beginning.
  *
  * Any number whose hex representation would fit in less than 4 hex digits (like 0x3E8)
  * will be padded by leading zeros to reach 4 characters. No padding is done for larger

@@ -40,6 +40,15 @@ matrix:
       os: osx
       osx_image: xcode11
       compiler: clang
+# The following build is the only one that runs tests for Java. It also runs all the normal tests.
+    - name: "GCC 9.3.0 and Java on Focal (20.04 LTS)"
+      os: linux
+      dist: focal
+      language: java
+      jdk: openjdk8
+      env:
+        - MATRIX_EVAL="CC=gcc && CXX=g++"
+        - USING_JAVA  # We don't check the value, only whether the var is set
 
 
 before_install:
@@ -69,3 +78,5 @@ script:
   - cmake --build . --target all
   - ./runtest
   - python3 ../test/integration_tests.py escape
+  - if [ -z ${USING_JAVA+foo} ]; then ./java/ciscript.sh; else echo 'Not running Java tests'; fi
+# The line to check for USING_JAVA is modified from here: https://stackoverflow.com/a/13864829
