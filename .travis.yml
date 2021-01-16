@@ -42,7 +42,7 @@ matrix:
       compiler: clang
 # The following build is the only one that runs tests for Java. It also runs all the normal tests.
 # Instructions for installing GCC on linux: https://docs.travis-ci.com/user/languages/cpp/#gcc-on-linux
-    - name: "GCC 9 and Java on Bionic (18.04 LTS)"
+    - name: "GCC 8 and Java on Bionic (18.04 LTS)"
       os: linux
       dist: bionic
       addons:
@@ -50,11 +50,11 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-9
+            - g++-8
       language: java
       jdk: openjdk8
       env:
-        - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
+        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
         - USING_JAVA  # We don't check the value, only whether the var is set
 
 
