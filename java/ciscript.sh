@@ -1,4 +1,6 @@
 #!/bin/bash
+# This script is used in .travis.yml to run the integration tests on the Java code.
+
 set -e # This is important to stop the script if the checksum doesn't match.
 echo 'Running integration tests for Java'
 echo 'java version:'
