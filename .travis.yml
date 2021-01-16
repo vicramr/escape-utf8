@@ -48,6 +48,7 @@ matrix:
       env:
         - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
         - USING_JAVA
+        - MAC_JAVA_VERSION
 # Info about installing openjdk 8 for macos is from these sources:
 # https://docs.travis-ci.com/user/installing-dependencies/#installing-from-taps
 # https://stackoverflow.com/a/55835094
@@ -83,5 +84,6 @@ script:
   - ./runtest
   - python3 ../test/integration_tests.py escape
   - cd ..
-  - if [ -z ${USING_JAVA+foo} ]; then echo 'Not running Java tests'; else ./java/ciscript.sh; fi
-# The line to check for USING_JAVA is modified from here: https://stackoverflow.com/a/13864829
+  - if [ -z ${MAC_JAVA_VERSION+foo} ]; then echo 'Not sourcing use_adoptopenjdk.sh'; else . ./java/ci/use_adoptopenjdk.sh; fi
+  - if [ -z ${USING_JAVA+foo} ]; then echo 'Not running Java tests'; else ./java/ci/ciscript.sh; fi
+# The lines to check for env vars are from here: https://stackoverflow.com/a/13864829

@@ -2,9 +2,11 @@ This directory contains a Java implementation of the escape program. This code i
 
 This project uses the Apache Commons CLI library, version 1.4. You can download the library from the Apache website: [https://commons.apache.org/proper/commons-cli/index.html](https://commons.apache.org/proper/commons-cli/index.html)
 
-I have only tested this on Linux (specifically Ubuntu). It should work fine on other systems but I have not tried it myself.
+I have tested this code on Linux and macOS but not Windows.
 
-# Instructions for building and running on Linux
+The files in the ci directory are only intended for use with Travis CI.
+
+# Instructions for building and running on Unix-like systems (e.g. Linux, macOS)
 1. Create a build directory inside this directory: ```mkdir build```
 2. ```cd build```
 3. Download `commons-cli-1.4-bin.tar.gz` from the Apache website: [https://commons.apache.org/proper/commons-cli/download_cli.cgi](https://commons.apache.org/proper/commons-cli/download_cli.cgi)
