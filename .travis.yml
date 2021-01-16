@@ -41,11 +41,11 @@ matrix:
       osx_image: xcode11
       compiler: clang
 # The following build is the only one that runs tests for Java. It also runs all the normal tests.
-    - name: "GCC 9.3.0 and Java on Focal (20.04 LTS)"
+    - name: "GCC and Java on Trusty (14.04 LTS)"
       os: linux
-      dist: focal
+      dist: trusty
       language: java
-      jdk: oraclejdk8
+      jdk: openjdk8
       env:
         - MATRIX_EVAL="CC=gcc && CXX=g++"
         - USING_JAVA  # We don't check the value, only whether the var is set
