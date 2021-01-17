@@ -38,3 +38,14 @@ if __name__ == "__main__":
         numbytes = f.write(b"\xF0\x80\x80\x80foo bar")
         assert numbytes == 11
     print("Wrote bad4byte successfully")
+
+    # truncate: malformed file with a 3-byte codepoint that's missing the third byte
+    with open("truncate", mode="wb") as f:
+        numbytes = f.write(b"first line\nsecond line")
+        assert numbytes == 22
+        yap = encode("\u2D52", encoding="utf8")
+        numbytes = f.write(yap[:-1])
+        assert numbytes == 2
+        numbytes = f.write(b"unreachable")
+        assert numbytes == 11
+    print("Wrote truncate successfully")

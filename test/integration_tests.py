@@ -145,6 +145,21 @@ if __name__ == "__main__":
         assert stdout_data == ""
         assert stderr_data == 'Failed to open input file "NonExistentFileName". Exiting now.\n'
 
+    # Output file already exists as a directory
+    with Popen([absolute_path_to_executable, "--output", absolute_path_to_gen], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode != 0
+        assert stdout_data == ""
+        assert stderr_data == 'Failed to open output file "' + absolute_path_to_gen + '". Exiting now.\n'
+
+    # Output file is at a nonexistent directory, with an input file that does exist
+    bad_output_path = os.path.join("foo", "bar", "baz")
+    with Popen([absolute_path_to_executable, "--output=" + bad_output_path, "shortmix1"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode != 0
+        assert stdout_data == ""
+        assert stderr_data == 'Failed to open output file "' + bad_output_path + '". Exiting now.\n'
+
     # 255
     file255 = os.path.join(absolute_path_to_gen, "255")
     with Popen([absolute_path_to_executable, file255], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
@@ -163,6 +178,30 @@ if __name__ == "__main__":
         with open("bad4byte1", mode="rb") as f:
             bad4byte1_data = f.read()
             assert bad4byte1_data == b"\\u'1F0A1'"
+
+    # truncate
+    truncate = os.path.join(absolute_path_to_gen, "truncate")
+    with Popen([absolute_path_to_executable, truncate, "--output", "truncate1"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode != 0
+        assert stdout_data == ""
+        assert stderr_data == "The given text is not valid UTF-8 text. Exiting now.\n"
+        with open("truncate1", mode="rb") as f:
+            truncate1_data = f.read()
+            assert truncate1_data == b"first line\nsecond line"
+
+    # Similar to truncate, except the input just ends after the bad character
+    with Popen([absolute_path_to_executable, "-o", "truncate2"], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        four_byte_chars = encode("\U00023456\U00010000", encoding="utf8")
+        assert len(four_byte_chars) == 8
+        (stdout_data, stderr_data) = proc.communicate(four_byte_chars[:-1])
+        assert stdout_data == b""
+        # Because we used universal_newlines=False, we need to be careful with checking stderr
+        assert stderr_data[:52] == b"The given text is not valid UTF-8 text. Exiting now."
+        assert (len(stderr_data) == 53) or (len(stderr_data) == 54)
+        with open("truncate2", mode="rb") as f:
+            truncate2_data = f.read()
+            assert truncate2_data == b"\\u'23456'"
 
 
     print("All integration tests passed!")
