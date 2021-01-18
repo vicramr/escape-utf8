@@ -50,6 +50,9 @@ class Escape {
             cmd = parser.parse(options, args);
 
             if (cmd.hasOption("help")) {
+                System.out.println("escape-utf8: Transform UTF-8 text to a representation in ASCII.");
+                System.out.println("For detailed information please see the README.");
+                System.out.println("");
                 formatter.printHelp(usage, options);
                 System.exit(0);
             }
@@ -63,15 +66,14 @@ class Escape {
                 throw new ParseException("Too many arguments");
             }
         } catch (ParseException e) {
-            System.out.println(e.getMessage());
-            formatter.printHelp(usage, options);
-
-            System.exit(1);
+            System.err.println(e.getMessage());
+            System.err.println("Use the --help option to see usage instructions.");
+            System.exit(5);
         }
-        
+
         String inputfile;
         String outputfile;
-        
+
         List<String> nonoptions = cmd.getArgList();
         if (nonoptions.size() == 1) {
             inputfile = nonoptions.get(0);
