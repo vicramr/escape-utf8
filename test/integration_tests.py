@@ -22,8 +22,8 @@ from codecs import encode
 
 def get_version_string(path2version):
     """
-    Given the path to version.h, this function returns the expected output
-    for 'escape --version'.
+    Given the path to version.h, this function returns the version
+    string in major.minor.patch format.
     """
     with open(path2version, mode="r") as f:
         for line in f:
@@ -35,7 +35,7 @@ def get_version_string(path2version):
                     minorstr = strings[2][1:-1]
                 elif strings[1] == "PATCH":
                     patchstr = strings[2][1:-1]
-    return "escape-utf8 version " + majorstr + "." + minorstr + "." + patchstr + "\n"
+    return majorstr + "." + minorstr + "." + patchstr
 
 
 if __name__ == "__main__":
@@ -57,16 +57,16 @@ if __name__ == "__main__":
 
     # We parse version.h to check the version string
     versionstr = get_version_string(os.path.join(absolute_path_to_test, "..", "version.h"))
-    print("Running integration tests for", versionstr, end="")
+    print("Running integration tests for version", versionstr)
     with Popen([absolute_path_to_executable, "--version"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
         (stdout_data, stderr_data) = proc.communicate()
         assert proc.returncode == 0
-        assert stdout_data == versionstr
+        assert versionstr in stdout_data
         assert stderr_data == ""
     with Popen([absolute_path_to_executable, "-v"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
         (stdout_data, stderr_data) = proc.communicate()
         assert proc.returncode == 0
-        assert stdout_data == versionstr
+        assert versionstr in stdout_data
         assert stderr_data == ""
 
     # Check help message option

@@ -15,7 +15,7 @@ import org.apache.commons.cli.ParseException;
 
 class Escape {
 
-    private static final String versionStr = "0.0.0";
+    private static final String versionStr = "0.0.2";
 
     private static final String linesep = System.lineSeparator(); // https://stackoverflow.com/a/30423625
     private static final String usage = linesep +
