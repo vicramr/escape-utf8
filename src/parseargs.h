@@ -13,14 +13,17 @@
 
 class EarlyFinish : public std::exception {};
 
+class InvalidCmd : public std::exception {};
+
 /**
  * This is a high-level function that parses command-line arguments, checks
  * that the arguments are well-formed, does error handling, and opens any
  * needed files for reading/writing.
  *
- * If the command-line args are not well-formed, or the user passes the
- * -h/--help or -v/--version options, then this function will print any necessary
- * help messages and throw an EarlyFinish exception.
+ * If the user passes the -h/--help or -v/--version options, then this function
+ * will print any necessary help messages and throw an EarlyFinish exception.
+ * If the user gives invalid args, then this function will print an error message
+ * and throw an InvalidCmd exception.
  * If there's an error when trying to open a file for reading/writing, then this
  * function will throw a FileError exception.
  * Otherwise, this function will succeed and return the input and output streams
@@ -31,13 +34,13 @@ class EarlyFinish : public std::exception {};
  * stdin or from a file; the ostream might be for stdout or for a file.
  * The details of where the streams point to are not relevant for the
  * caller; the caller should just treat these as streams of bytes.
- * @throws As discussed above, this function can throw an EarlyFinish exception or a
- * FileError exception.
+ * @throws As discussed above, this function can throw an EarlyFinish exception,
+ * FileError exception, or InvalidCmd exception.
  *
  * For EarlyFinish the caller should clean up and exit the program with exit status 0;
  * this is not considered an error.
- * For FileError the caller should clean up and exit the program with nonzero exit status;
- * this is considered an error.
+ * For FileError or InvalidCmd the caller should clean up and exit the program with
+ * nonzero exit status; this is considered an error.
  */
 StreamPair parse(int argc, char **argv);
 

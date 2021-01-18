@@ -9,12 +9,13 @@
 
 /*
  * EXIT CODES
- * 0: success, or malformed command-line input
+ * 0: success
  * 1: failed to open input/output file
  * 2: the given text is not valid UTF-8 (e.g. the file ended in the middle of
  *    a multi-byte character)
  * 3: error when trying to read from input file
  * 4: error when trying to write to output file
+ * 5: malformed command line
  */
 
 int main(int argc, char *argv[]) {
@@ -31,5 +32,7 @@ int main(int argc, char *argv[]) {
         return 0;
     } catch (const FileError&) {
         return 1;
+    } catch (const InvalidCmd&) {
+        return 5;
     }
 }

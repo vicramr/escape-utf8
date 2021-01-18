@@ -13,35 +13,13 @@
 static std::string const helpmsg(
 // This is a C++11 raw string literal.
 R"<delim>(escape-utf8: Transform UTF-8 text to a representation in ASCII.
-This program takes as input a single piece of text, either from a file
-or stdin. The text will be treated as if it's encoded in UTF-8. If the
-given text turns out to not be valid UTF-8 then the program will exit
-with an error message.
+This program takes as input a piece of text encoded in UTF-8, either
+from a file or stdin. It outputs the same text except with any non-
+ASCII characters (and some non-printable ASCII characters) replaced
+with an ASCII representation.
 
-This program outputs text in regular ASCII (that is, bytes with values
-from 0 to 127). In the output text, any ASCII characters will be
-unchanged, except for some control characters. All other characters
-(including the aforementioned control characters) will be output in
-escaped form; that is, they will be output as a sequence of 8 to 10
-ASCII characters.
-
-Here are some examples of how characters are escaped:
-The Unicode character U+00F1 (lowercase n with a tilde above it) would
-be expanded to the 8-character string "\u'00F1'".
-U+1F602 (the laughing crying emoji, officially known as "Face with
-Tears of Joy") would be expanded to the 9-character string "\u'1F602'".
-Note that in the above strings, the inner single-quote characters will
-indeed be part of the output, while the outer double-quotes will not.
-No extra whitespace will be added before or after the expanded strings.
-
-By default, the output is written to stdout. This can be changed with
-the -o option.
-
-In the event of any error, such as a failure to write to the output
-file or input text which is not valid UTF-8, this program will write an
-error message to stderr and exit with a nonzero exit code.
-On success, nothing extra will be printed (only the escaped text) and
-the program will exit with an exit code of 0.
+If the input text is not valid UTF-8 text then this program will print
+an error message and terminate.
 
 
 Usage:
@@ -51,8 +29,7 @@ Usage:
 
 Argument:
   INPUTFILE    Path to the input file. This argument may be omitted; if
-               so, input will be read from stdin. This allows this
-               program to be used in a Unix pipe.
+               so, input will be read from stdin.
 
 Options:
   -h, --help                          Show this help message.
@@ -88,13 +65,14 @@ StreamPair parse(int argc, char **argv) {
         std::cout << "escape-utf8 version " << MAJOR << "." << MINOR << "." << PATCH << std::endl;
         throw EarlyFinish();
     }
-    if (!bits[2]) {
-        assert(bits[0]);
-        std::cout << "The given input is not a valid usage of this program. Please see the below usage instructions." << std::endl << std::endl;
-    }
     if (bits[0]) {
-        std::cout << helpmsg; // helpmsg already has a newline at the end
-        throw EarlyFinish();
+        if (bits[2]) {
+            std::cout << helpmsg; // helpmsg already has a newline at the end
+            throw EarlyFinish();
+        } else {
+            std::cerr << "The given input is not a valid usage of this program.\nUse 'escape --help' for usage information." << std::endl;
+            throw InvalidCmd();
+        }
     }
     assert(bits[2]);
     // The only remaining case is the one where we can continue with the rest of the program.
@@ -125,11 +103,11 @@ StreamPair parse(int argc, char **argv) {
  * whether something has been stored in it.
  * @param outputfile Just like inputfile, but for the OUTPUTFILE arg.
  * @return A bitset with 3 bits. This encodes the relevant information about the given args.
- * Bit 0 is the "help" bit; it is 1 iff you should print the help message and exit.
+ * Bit 0 is the "help" bit; it is 1 iff you should print a help message and exit.
  * Bit 1 is the "version" bit; it is 1 iff you should print the version-number message and exit.
  * Bit 2 is the "valid" bit. It is 1 if the given command-line args are valid and you
  * can continue with the program; it is 0 if the args are invalid in some way, in which case
- * you should print an "invalid args" message, print the help message, and exit.
+ * you should print an "invalid args" message and exit.
  *
  * If the "valid" bit is 0 then it is guaranteed that the "help" bit will be 1.
  * If the "version" bit is 1 then it is guaranteed that the "valid" bit will be 1.
