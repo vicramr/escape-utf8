@@ -20,6 +20,24 @@ import os
 from subprocess import Popen, PIPE
 from codecs import encode
 
+def get_version_string(path2version):
+    """
+    Given the path to version.h, this function returns the expected output
+    for 'escape --version'.
+    """
+    with open(path2version, mode="r") as f:
+        for line in f:
+            strings = line.split()
+            if len(strings) == 3:
+                if strings[1] == "MAJOR":
+                    majorstr = strings[2][1:-1] # We slice the string to remove the parens
+                elif strings[1] == "MINOR":
+                    minorstr = strings[2][1:-1]
+                elif strings[1] == "PATCH":
+                    patchstr = strings[2][1:-1]
+    return "escape-utf8 version " + majorstr + "." + minorstr + "." + patchstr + "\n"
+
+
 if __name__ == "__main__":
     if len(sys.argv) <= 1:
         sys.exit("You must give the path to the compiled 'escape' executable file as a command-line argument.")
@@ -36,6 +54,32 @@ if __name__ == "__main__":
     absolute_path_to_test = os.path.dirname(absolute_path_to_file)
     absolute_path_to_vcs_testcases = os.path.join(absolute_path_to_test, "vcs_testcases")
     absolute_path_to_gen = os.path.join(absolute_path_to_vcs_testcases, "gen")
+
+    # We parse version.h to check the version string
+    versionstr = get_version_string(os.path.join(absolute_path_to_test, "..", "version.h"))
+    print("Running integration tests for", versionstr, end="")
+    with Popen([absolute_path_to_executable, "--version"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode == 0
+        assert stdout_data == versionstr
+        assert stderr_data == ""
+    with Popen([absolute_path_to_executable, "-v"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode == 0
+        assert stdout_data == versionstr
+        assert stderr_data == ""
+
+    # Check help message option
+    with Popen([absolute_path_to_executable, "--help"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode == 0
+        assert len(stdout_data) > 0
+        assert stderr_data == ""
+    with Popen([absolute_path_to_executable, "-h"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode == 0
+        assert len(stdout_data) > 0
+        assert stderr_data == ""
 
     # simple1
     simple1 = os.path.join(absolute_path_to_vcs_testcases, "simple1")
@@ -195,6 +239,7 @@ if __name__ == "__main__":
         four_byte_chars = encode("\U00023456\U00010000", encoding="utf8")
         assert len(four_byte_chars) == 8
         (stdout_data, stderr_data) = proc.communicate(four_byte_chars[:-1])
+        assert proc.returncode != 0
         assert stdout_data == b""
         # Because we used universal_newlines=False, we need to be careful with checking stderr
         assert stderr_data[:52] == b"The given text is not valid UTF-8 text. Exiting now."
@@ -202,6 +247,20 @@ if __name__ == "__main__":
         with open("truncate2", mode="rb") as f:
             truncate2_data = f.read()
             assert truncate2_data == b"\\u'23456'"
+
+    # Malformed command line 1
+    with Popen([absolute_path_to_executable, "foo", "bar"], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode != 0
+        assert stdout_data == b""
+        assert len(stderr_data) > 0
+
+    # Malformed command line 2
+    with Popen([absolute_path_to_executable, "InputFile", "--output"], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode != 0
+        assert stdout_data == b""
+        assert len(stderr_data) > 0
 
 
     print("All integration tests passed!")
