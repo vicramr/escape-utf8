@@ -49,3 +49,10 @@ if __name__ == "__main__":
         numbytes = f.write(b"unreachable")
         assert numbytes == 11
     print("Wrote truncate successfully")
+
+    # whitespace: contains all the different kinds of ASCII space chars
+    with open("whitespace", mode="wb") as f:
+        whitespace = b"Tab:\tfoo\nLF:\nfoo\n\\v:\x0Bfoo\n\\f:\x0Cfoo\nCR:\rfoo\nSpace: foo\n"
+        numbytes = f.write(whitespace)
+        assert numbytes == 52
+    print("Wrote whitespace successfully")

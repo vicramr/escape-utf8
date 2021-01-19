@@ -182,6 +182,18 @@ if __name__ == "__main__":
             shortmix1_data = f.read()
             assert shortmix1_data == out
 
+    # whitespace
+    whitespace = os.path.join(absolute_path_to_gen, "whitespace")
+    out = b"Tab:\tfoo\nLF:\nfoo\n\\v:\\u'000B'foo\n\\f:\\u'000C'foo\nCR:\rfoo\nSpace: foo\n"
+    with Popen([absolute_path_to_executable, "--output=whitespace1", whitespace], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode == 0
+        assert stdout_data == b""
+        assert stderr_data == b""
+        with open("whitespace1", mode="rb") as f:
+            whitespace1_data = f.read()
+            assert whitespace1_data == out
+
     # Nonexistent input file (note, we're opening the streams in text mode here!)
     with Popen([absolute_path_to_executable, "NonExistentFileName"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
         (stdout_data, stderr_data) = proc.communicate()

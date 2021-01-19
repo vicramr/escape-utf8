@@ -1,6 +1,7 @@
 /**
- * This is the class with the main method. The main logic here is to
- * parse the command-line arguments.
+ * This is the class with the main method. This file contains the logic
+ * to parse the command-line arguments and give the results to the rest of
+ * the program.
  */
 
 import java.util.List;
