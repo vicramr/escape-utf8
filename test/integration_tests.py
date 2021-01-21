@@ -218,6 +218,19 @@ if __name__ == "__main__":
         assert stdout_data == out
         assert stderr_data == b""
 
+    # boundary_success
+    boundary_success = os.path.join(absolute_path_to_gen, "boundary_success")
+    out = b"\\u'0000'\\u'007F'\\u'0080'\\u'07FF'\\u'0800'\\u'FFFF'\\u'10000'\\u'10FFFF'"
+    with Popen([absolute_path_to_executable, boundary_success, "-o", "boundary_success1"], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode == 0
+        assert stdout_data == b""
+        assert stderr_data == b""
+        with open("boundary_success1", mode="rb") as f:
+            boundary_success1_data = f.read()
+            assert boundary_success1_data == out
+
+
     # Nonexistent input file (note, we're opening the streams in text mode here!)
     with Popen([absolute_path_to_executable, "NonExistentFileName"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
         (stdout_data, stderr_data) = proc.communicate()

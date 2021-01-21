@@ -66,3 +66,18 @@ if __name__ == "__main__":
         numbytes = f.write(encode("\U000FFFFF\U00100000 \U00100001\U0010FFFD \U0010FFFE\U0010FFFF", encoding="utf8"))
         assert numbytes == 26
     print("wrote len6 successfully")
+
+    # boundary_success: valid UTF-8 file that contains chars at the boundaries
+    # of codepoint ranges for 1, 2, 3, and 4-byte chars.
+    # Note: text editors appear to have more trouble than usual displaying this file,
+    # but it should be 100% valid UTF-8.
+    with open("boundary_success", mode="wb") as f:
+        numbytes = f.write(encode("\u0000\u007F", encoding="utf8"))
+        assert numbytes == 2
+        numbytes = f.write(encode("\u0080\u07FF", encoding="utf8"))
+        assert numbytes == 4
+        numbytes = f.write(encode("\u0800\uFFFF", encoding="utf8"))
+        assert numbytes == 6
+        numbytes = f.write(encode("\U00010000\U0010FFFF", encoding="utf8"))
+        assert numbytes == 8
+    print("wrote boundary_success successfully")
