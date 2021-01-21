@@ -181,6 +181,15 @@ if __name__ == "__main__":
         with open("shortmix1", mode="rb") as f:
             shortmix1_data = f.read()
             assert shortmix1_data == out
+    # shortmix, testing that program correctly ignores stdin when reading from file
+    with Popen([absolute_path_to_executable, shortmix, "-o", "shortmix2"], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate(b"Foo Bar")
+        assert proc.returncode == 0
+        assert stdout_data == b""
+        assert stderr_data == b""
+        with open("shortmix2", mode="rb") as f:
+            shortmix2_data = f.read()
+            assert shortmix2_data == out
 
     # whitespace
     whitespace = os.path.join(absolute_path_to_gen, "whitespace")
@@ -193,6 +202,21 @@ if __name__ == "__main__":
         with open("whitespace1", mode="rb") as f:
             whitespace1_data = f.read()
             assert whitespace1_data == out
+
+    # len6
+    len6 = os.path.join(absolute_path_to_gen, "len6")
+    out = b"\\u'FFFFF'\\u'100000' \\u'100001'\\u'10FFFD' \\u'10FFFE'\\u'10FFFF'"
+    with Popen([absolute_path_to_executable, len6], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode == 0
+        assert stdout_data == out
+        assert stderr_data == b""
+    # testing that program correctly ignores stdin when reading from file
+    with Popen([absolute_path_to_executable, len6], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate(b"lorem \r ipsum \n \x00\x23\xFF\r\n")
+        assert proc.returncode == 0
+        assert stdout_data == out
+        assert stderr_data == b""
 
     # Nonexistent input file (note, we're opening the streams in text mode here!)
     with Popen([absolute_path_to_executable, "NonExistentFileName"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:

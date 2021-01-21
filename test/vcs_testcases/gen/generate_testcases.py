@@ -56,3 +56,13 @@ if __name__ == "__main__":
         numbytes = f.write(whitespace)
         assert numbytes == 52
     print("Wrote whitespace successfully")
+
+    # len6: contains 4-byte chars whose escaped forms are 6 chars long
+    # note: 100000 through 10FFFD are in the private use area, while 10FFFE and 10FFFF
+    # are considered "noncharacters". However, consumers of Unicode data should not
+    # reject text with these characters.
+    # See here: https://en.wikipedia.org/wiki/Private_Use_Areas#Private_Use_Areas
+    with open("len6", mode="wb") as f:
+        numbytes = f.write(encode("\U000FFFFF\U00100000 \U00100001\U0010FFFD \U0010FFFE\U0010FFFF", encoding="utf8"))
+        assert numbytes == 26
+    print("wrote len6 successfully")
