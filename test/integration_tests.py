@@ -94,14 +94,14 @@ if __name__ == "__main__":
     with Popen([absolute_path_to_executable, joy], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
         (stdout_data, stderr_data) = proc.communicate()
         assert proc.returncode == 0
-        assert stdout_data == br"\u'1F602'\u'1F602'"
+        assert stdout_data == b"\\u'1F602'\\u'1F602'"
         assert stderr_data == b""
 
     # Test ASCII control characters
     with Popen([absolute_path_to_executable], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
         (stdout_data, stderr_data) = proc.communicate(b"\x00")
         assert proc.returncode == 0
-        assert stdout_data == br"\u'0000'"
+        assert stdout_data == b"\\u'0000'"
         assert stderr_data == b""
 
     control = os.path.join(absolute_path_to_gen, "control")
