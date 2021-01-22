@@ -303,7 +303,7 @@ if __name__ == "__main__":
         (stdout_data, stderr_data) = proc.communicate(input_bytes)
         assert proc.returncode != 0
         assert stdout_data == b"foo "
-        assert stderr_data[:52] = b"The given text is not valid UTF-8 text. Exiting now."
+        assert stderr_data[:52] == b"The given text is not valid UTF-8 text. Exiting now."
         assert (len(stderr_data) == 53) or (len(stderr_data) == 54)
     # boundary_fail_2byte
     boundary_fail_2byte = os.path.join(absolute_path_to_gen, "boundary_fail_2byte")
@@ -312,6 +312,22 @@ if __name__ == "__main__":
         assert proc.returncode != 0
         assert stdout_data == "foo"
         assert stderr_data == "The given text is not valid UTF-8 text. Exiting now.\n"
+
+    # boundary_fail_3byte
+    boundary_fail_3byte = os.path.join(absolute_path_to_gen, "boundary_fail_3byte")
+    with Popen([absolute_path_to_executable, boundary_fail_3byte], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode != 0
+        assert stdout_data == "foo"
+        assert stderr_data == "The given text is not valid UTF-8 text. Exiting now.\n"
+    # Similar test, for codepoint 0x7FF (one less than the valid range for 3-byte chars)
+    with Popen([absolute_path_to_executable], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        input_bytes = b"foo\xE0\x9F\xBFbar"
+        (stdout_data, stderr_data) = proc.communicate(input_bytes)
+        assert proc.returncode != 0
+        assert stdout_data == b"foo"
+        assert stderr_data[:52] == b"The given text is not valid UTF-8 text. Exiting now."
+        assert (len(stderr_data) == 53) or (len(stderr_data) == 54)
 
     # Malformed command line 1
     with Popen([absolute_path_to_executable, "foo", "bar"], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:

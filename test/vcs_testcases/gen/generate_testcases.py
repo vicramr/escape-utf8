@@ -89,3 +89,10 @@ if __name__ == "__main__":
         numbytes = f.write(b"foo\xC1\xBFbar")
         assert numbytes == 8
     print("wrote boundary_fail_2byte successfully")
+
+    # boundary_fail_3byte: invalid UTF-8 file that contains a 3-byte character
+    # encoding a codepoint of 0x123.
+    with open("boundary_fail_3byte", mode="wb") as f:
+        numbytes = f.write(b"foo\xE0\x84\xA3bar")
+        assert numbytes == 9
+    print("wrote boundary_fail_3byte successfully")
