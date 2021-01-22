@@ -81,3 +81,11 @@ if __name__ == "__main__":
         numbytes = f.write(encode("\U00010000\U0010FFFF", encoding="utf8"))
         assert numbytes == 8
     print("wrote boundary_success successfully")
+
+    # boundary_fail_2byte: invalid UTF-8 file that contains a 2-byte character
+    # with a codepoint of 0x7F. This is 1 less than the valid range for 2-byte
+    # UTF-8 characters.
+    with open("boundary_fail_2byte", mode="wb") as f:
+        numbytes = f.write(b"foo\xC1\xBFbar")
+        assert numbytes == 8
+    print("wrote boundary_fail_2byte successfully")
