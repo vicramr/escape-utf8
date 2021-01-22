@@ -261,17 +261,6 @@ if __name__ == "__main__":
         assert stdout_data == ""
         assert stderr_data == "The given text is not valid UTF-8 text. Exiting now.\n"
 
-    # bad4byte
-    bad4byte = os.path.join(absolute_path_to_gen, "bad4byte")
-    with Popen([absolute_path_to_executable, bad4byte, "-obad4byte1"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
-        (stdout_data, stderr_data) = proc.communicate()
-        assert proc.returncode != 0
-        assert stdout_data == ""
-        assert stderr_data == "The given text is not valid UTF-8 text. Exiting now.\n"
-        with open("bad4byte1", mode="rb") as f:
-            bad4byte1_data = f.read()
-            assert bad4byte1_data == b"\\u'1F0A1'"
-
     # truncate
     truncate = os.path.join(absolute_path_to_gen, "truncate")
     with Popen([absolute_path_to_executable, truncate, "--output", "truncate1"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
@@ -328,6 +317,18 @@ if __name__ == "__main__":
         assert stdout_data == b"foo"
         assert stderr_data[:52] == b"The given text is not valid UTF-8 text. Exiting now."
         assert (len(stderr_data) == 53) or (len(stderr_data) == 54)
+
+    # Test for out-of-range codepoints in 4-byte chars
+    # bad4byte
+    bad4byte = os.path.join(absolute_path_to_gen, "bad4byte")
+    with Popen([absolute_path_to_executable, bad4byte, "-obad4byte1"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode != 0
+        assert stdout_data == ""
+        assert stderr_data == "The given text is not valid UTF-8 text. Exiting now.\n"
+        with open("bad4byte1", mode="rb") as f:
+            bad4byte1_data = f.read()
+            assert bad4byte1_data == b"\\u'1F0A1'"
 
     # Malformed command line 1
     with Popen([absolute_path_to_executable, "foo", "bar"], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
