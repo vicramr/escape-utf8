@@ -369,3 +369,24 @@ if __name__ == "__main__":
 
 
     print("All integration tests passed!")
+
+    # Informational: print the behavior upon newlines
+    with Popen([absolute_path_to_executable, "-o", "checknewline1"], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate(b"foo\nbar\r\nbaz")
+        assert proc.returncode == 0
+        assert stdout_data == b""
+        assert stderr_data == b""
+        with open("checknewline1", mode="rb") as f:
+            checknewline1_data = f.read()
+            print('Stdin was "foo\\nbar\\r\\nbaz". Output file is:')
+            print(checknewline1_data)
+
+    with open("check_output_newline", mode="wb") as f:
+        numbytes = f.write(b"foo\nbar\r\nbaz")
+        assert numbytes == 12
+    with Popen([absolute_path_to_executable, "check_output_newline"], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode == 0
+        assert stderr_data == b""
+        print('Input file was "foo\\nbar\\r\\nbaz". Stdout is:')
+        print(stdout_data)
