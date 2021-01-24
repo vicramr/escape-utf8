@@ -96,3 +96,11 @@ if __name__ == "__main__":
         numbytes = f.write(b"foo\xE0\x84\xA3bar")
         assert numbytes == 9
     print("wrote boundary_fail_3byte successfully")
+
+    # boundary_fail_4byte: invalid UTF-8 file that contains a 4-byte character
+    # encoding a codepoint of 0x110000. This is 1 more than the largest valid
+    # Unicode codepoint.
+    with open("boundary_fail_4byte", mode="wb") as f:
+        numbytes = f.write(b"foo\xF4\x90\x80\x80bar")
+        assert numbytes == 10
+    print("Wrote boundary_fail_4byte successfully")

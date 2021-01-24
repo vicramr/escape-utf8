@@ -329,6 +329,29 @@ if __name__ == "__main__":
         with open("bad4byte1", mode="rb") as f:
             bad4byte1_data = f.read()
             assert bad4byte1_data == b"\\u'1F0A1'"
+    # Similar test, for codepoint 0x1234
+    with Popen([absolute_path_to_executable], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        input_bytes = b"foo\xF0\x81\x88\xB4bar"
+        (stdout_data, stderr_data) = proc.communicate(input_bytes)
+        assert proc.returncode != 0
+        assert stdout_data == b"foo"
+        assert stderr_data[:52] == b"The given text is not valid UTF-8 text. Exiting now."
+        assert (len(stderr_data) == 53) or (len(stderr_data) == 54)
+    # Similar test, for codepoint 0xFFFF (one less than the valid range)
+    with Popen([absolute_path_to_executable], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        input_bytes = b"foo\xF0\x8F\xBF\xBFbar"
+        (stdout_data, stderr_data) = proc.communicate(input_bytes)
+        assert proc.returncode != 0
+        assert stdout_data == b"foo"
+        assert stderr_data[:52] == b"The given text is not valid UTF-8 text. Exiting now."
+        assert (len(stderr_data) == 53) or (len(stderr_data) == 54)
+    # boundary_fail_4byte
+    boundary_fail_4byte = os.path.join(absolute_path_to_gen, "boundary_fail_4byte")
+    with Popen([absolute_path_to_executable, boundary_fail_4byte], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode != 0
+        assert stdout_data == "foo"
+        assert stderr_data == "The given text is not valid UTF-8 text. Exiting now.\n"
 
     # Malformed command line 1
     with Popen([absolute_path_to_executable, "foo", "bar"], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
