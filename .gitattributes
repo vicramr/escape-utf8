@@ -1,0 +1,4 @@
+# Declare the test cases binary so Git won't touch the line endings
+# Note: this also matches a couple of files that are technically not
+# test cases, like generate_testcases.py, but it's not a big deal
+test/vcs_testcases/** binary
