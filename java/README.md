@@ -4,7 +4,7 @@ This project uses the Apache Commons CLI library, version 1.4. You can download 
 
 I have tested this code on Linux, macOS, and Windows.
 
-The files in the ci directory are only intended for use with Travis CI.
+The files in the ci directory are only intended for use with Travis CI/Appveyor.
 
 # Instructions for building and running
 1. Create a build directory inside this directory: ```mkdir build```
