@@ -32,11 +32,6 @@
  */
 
 int main(int argc, char *argv[]) {
-    // This line should improve I/O performance. But it makes this program not thread-safe.
-    // We're not using multi-threading, so that's all right.
-    std::ios_base::sync_with_stdio(false);
-
-
 
 #ifdef _WIN32
     /* stdin and stdout are opened in text mode. On Windows, that means they
@@ -53,6 +48,10 @@ int main(int argc, char *argv[]) {
         return 6;
     }
 #endif
+
+    // This line should improve I/O performance. But it makes this program not thread-safe.
+    // We're not using multi-threading, so that's all right.
+    std::ios_base::sync_with_stdio(false);
 
 
     try {
