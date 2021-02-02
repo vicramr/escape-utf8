@@ -11,6 +11,8 @@ javac -version | %{ "$_" }
 # Note: the -version commands print to stderr, which Powershell treats as an error.
 # The workaround is to convert the error objects to strings. See here:
 # https://stackoverflow.com/a/20950421
+# For some reason Powershell still throws an error, but it doesn't terminate the script
+# so we can just ignore those error messages.
 
 
 cd java
