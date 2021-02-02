@@ -4,12 +4,7 @@ existing files. Be careful!
 
 This file contains integration tests. To test the program end-to-end, we use subprocess.Popen
 to run the compiled program with various file/text inputs and check that every byte of the output
-is exactly as expected (both std/file output and stderr).
-
-Unfortunately, because the cin/cout streams are opened in text mode by default, it is hard
-to write byte-for-byte tests that use stdin or stdout. That's because line endings will be
-altered by cin/cout on Windows but not on Unix-like systems. The workaround is to specify
-both an input and output file for any test cases that involve line endings.
+is exactly as expected (both stdout/file output and stderr).
 """
 
 import sys
@@ -80,6 +75,13 @@ if __name__ == "__main__":
         assert proc.returncode == 0
         assert len(stdout_data) > 0
         assert stderr_data == ""
+
+    # Test that newlines aren't modified by stdin/stdout
+    with Popen([absolute_path_to_executable], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate(b"line1\rline2\nline3\r\n")
+        assert proc.returncode == 0
+        assert stdout_data == b"line1\rline2\nline3\r\n"
+        assert stderr_data == b""
 
     # simple1
     simple1 = os.path.join(absolute_path_to_vcs_testcases, "simple1")
