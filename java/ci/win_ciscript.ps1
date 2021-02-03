@@ -20,7 +20,7 @@ if ((Get-FileHash -Algorithm SHA256 -Path .\commons-cli-1.4.jar).Hash -eq "FD3C7
 	javac -classpath commons-cli-1.4\commons-cli-1.4.jar -sourcepath .. -d . -Xlint ..\Escape.java
 	echo "Now compiling winrun"
 	cmake ..\ci\ -DCMAKE_CONFIGURATION_TYPES="Release"
-	cmake --build . --config Release
+	#cmake --build . --config Release
 	echo "Now running tests"
 	C:\Python35-x64\python.exe ..\..\test\integration_tests.py .\Release\winrun.exe
 	exit $LastExitCode
