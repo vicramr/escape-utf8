@@ -4,6 +4,13 @@
 # in AppVeyor. As such, it has a hard-coded path to the Python executable.
 
 echo "Running Windows integration tests for Java"
+echo "java version:"
+java -version 2>&1 | %{ "$_" }
+echo "javac version:"
+javac -version 2>&1 | %{ "$_" }
+# Note: the -version commands print to stderr, which Powershell treats as an error.
+# The workaround is to convert the error objects to strings. See here:
+# https://stackoverflow.com/a/20950421
 
 cd java
 md build
