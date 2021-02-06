@@ -23,37 +23,35 @@
 
 
 static std::string const helpmsg(
-// This is a C++11 raw string literal.
-R"<delim>(escape-utf8: Transform UTF-8 text to a representation in ASCII.
-This program takes as input a piece of text encoded in UTF-8, either
-from a file or stdin. It outputs the same text except with any non-
-ASCII characters (and some non-printable ASCII characters) replaced
-with an ASCII representation.
-
-If the input text is not valid UTF-8 text then this program will print
-an error message and terminate.
-
-
-Usage:
-  escape [INPUTFILE] [-o OUTPUTFILE]
-  escape -h | --help
-  escape -v | --version
-
-Argument:
-  INPUTFILE    Path to the input file. This argument may be omitted; if
-               so, input will be read from stdin.
-
-Options:
-  -h, --help                          Show this help message.
-  -v, --version                       Show version.
-  -o OUTPUTFILE, --output OUTPUTFILE  Path to the file to write output
-                                      to. If this option is omitted,
-                                      the output will be printed to
-                                      stdout. If the file doesn't exist
-                                      then it will be created; if it
-                                      does exist, it will be
-                                      overwritten.
-)<delim>"
+"escape-utf8: Transform UTF-8 text to a representation in ASCII.\n"
+"This program takes as input a piece of text encoded in UTF-8, either\n"
+"from a file or stdin. It outputs the same text except with any non-\n"
+"ASCII characters (and some non-printable ASCII characters) replaced\n"
+"with an ASCII representation.\n"
+"\n"
+"If the input text is not valid UTF-8 text then this program will print\n"
+"an error message and terminate.\n"
+"\n"
+"\n"
+"Usage:\n"
+"  escape [INPUTFILE] [-o OUTPUTFILE]\n"
+"  escape -h | --help\n"
+"  escape -v | --version\n"
+"\n"
+"Argument:\n"
+"  INPUTFILE    Path to the input file. This argument may be omitted; if\n"
+"               so, input will be read from stdin.\n"
+"\n"
+"Options:\n"
+"  -h, --help                          Show this help message.\n"
+"  -v, --version                       Show version.\n"
+"  -o OUTPUTFILE, --output OUTPUTFILE  Path to the file to write output\n"
+"                                      to. If this option is omitted,\n"
+"                                      the output will be printed to\n"
+"                                      stdout. If the file doesn't exist\n"
+"                                      then it will be created; if it\n"
+"                                      does exist, it will be\n"
+"                                      overwritten.\n"
 );
 
 
