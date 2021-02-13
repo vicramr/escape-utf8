@@ -31,7 +31,7 @@ class BusinessLogic {
             return 1;
         }
 
-        int exitcode = run_impl(streams);
+        int exitcode = runImpl(streams);
         try {
             streams.closeStreams();
         } catch (IOException e) {
@@ -51,7 +51,7 @@ class BusinessLogic {
      *
      * The return value is the exit code for the program.
      */
-    private static int run_impl(StreamPair streams) {
+    private static int runImpl(StreamPair streams) {
         while (true) {
             assert !streams.out.checkError();
 
@@ -85,9 +85,9 @@ class BusinessLogic {
                 }
                 int mask = getMask(numbytes);
 
-                // First we get the lower-order bits into position in decoded_char,
-                // then we read the next few bytes and construct the codepoint in decoded_char.
-                int decoded_char = octet & mask;
+                // First we get the lower-order bits into position in decodedChar,
+                // then we read the next few bytes and construct the codepoint in decodedChar.
+                int decodedChar = octet & mask;
                 for (int i = 1; i < numbytes; ++i) {
                     try {
                         octet = streams.in.read();
@@ -108,25 +108,25 @@ class BusinessLogic {
                         return 2;
                     }
                     // Otherwise the byte is valid.
-                    decoded_char <<= 6;
-                    decoded_char |= (octet & 0b00111111);
+                    decodedChar <<= 6;
+                    decodedChar |= (octet & 0b00111111);
                 }
-                // Now decoded_char holds the value of the decoded codepoint. We still need to check
+                // Now decodedChar holds the value of the decoded codepoint. We still need to check
                 // that this is in the valid range of codepoints, given the number of bytes.
-                if (numbytes == 2 && (decoded_char < 0x80 || decoded_char > 0x7FF)) {
+                if (numbytes == 2 && (decodedChar < 0x80 || decodedChar > 0x7FF)) {
                     System.err.println(MALFORMED);
                     return 2;
                 }
-                if (numbytes == 3 && (decoded_char < 0x800 || decoded_char > 0xFFFF)) {
+                if (numbytes == 3 && (decodedChar < 0x800 || decodedChar > 0xFFFF)) {
                     System.err.println(MALFORMED);
                     return 2;
                 }
-                if (numbytes == 4 && (decoded_char < 0x10000 || decoded_char > 0x10FFFF)) {
+                if (numbytes == 4 && (decodedChar < 0x10000 || decodedChar > 0x10FFFF)) {
                     System.err.println(MALFORMED);
                     return 2;
                 }
                 // We have finished checking the value of the character so now we can print it.
-                streams.out.format(Locale.US, "\\u'%04X'", decoded_char);
+                streams.out.format(Locale.US, "\\u'%04X'", decodedChar);
             }
         // At the end of each iter of the while loop, if we reach this point, then it is
         // guaranteed that we have written to streams.out exactly once (with either write or format).

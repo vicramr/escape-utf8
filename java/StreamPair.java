@@ -16,9 +16,9 @@ import java.nio.charset.StandardCharsets;
  * Once you are finished with both streams, you should call closeStreams.
  */
 class StreamPair {
-    boolean using_stdin;
+    boolean usingStdin;
     InputStream in;
-    boolean using_stdout;
+    boolean usingStdout;
     PrintStream out;
 
     /**
@@ -38,10 +38,10 @@ class StreamPair {
      */
     StreamPair(String inputfile, String outputfile) throws StreamPairException, IOException {
         if (inputfile == null) {
-            using_stdin = true;
+            usingStdin = true;
             in = System.in;
         } else {
-            using_stdin = false;
+            usingStdin = false;
 
             InputStream instream = null;
             try {
@@ -57,10 +57,10 @@ class StreamPair {
         }
 
         if (outputfile == null) {
-            using_stdout = true;
+            usingStdout = true;
             out = System.out;
         } else {
-            using_stdin = false;
+            usingStdin = false;
 
             OutputStream outstream = null;
             try {
@@ -69,7 +69,7 @@ class StreamPair {
             } catch (InvalidPathException | IOException | SecurityException e) {
                 assert outstream == null;
                 // Because we may have opened an input file, we must also close it.
-                if (!using_stdin) {
+                if (!usingStdin) {
                     in.close();
                 }
                 throw new StreamPairException("Failed to open output file \"" + outputfile + "\". Exiting now.");
@@ -87,11 +87,11 @@ class StreamPair {
      */
     void closeStreams() throws IOException {
         try {
-            if (!using_stdin) {
+            if (!usingStdin) {
                 in.close();
             }
         } finally {
-            if (!using_stdout) {
+            if (!usingStdout) {
                 out.close();
             }
         }

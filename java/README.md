@@ -13,7 +13,7 @@ The files in the ci directory are only intended for use with Travis CI/Appveyor.
 4. Compare the signatures of the downloaded file against the signatures on the Apache website. This step is optional but highly recommended.
 5. Extract the files. For example, with the `tar` command, you would run: ```tar -xzvf commons-cli-1.4-bin.tar.gz```
 6. Compile with javac: ```javac -classpath commons-cli-1.4/commons-cli-1.4.jar -sourcepath .. -d . -Xlint ../Escape.java```
-7. Run using the java command. On Unix-like systems the command is: ```java -ea -classpath .:commons-cli-1.4/commons-cli-1.4.jar Escape [args]...``` and on Windows the command is: ```java -ea -classpath ".;commons-cli-1.4\commons-cli-1.4.jar" Escape [args]...```
+7. Run using the java command. On Unix-like systems the command is: ```java -classpath .:commons-cli-1.4/commons-cli-1.4.jar Escape [args]...``` and on Windows the command is: ```java -classpath ".;commons-cli-1.4\commons-cli-1.4.jar" Escape [args]...```
 
 ## Testing with integration_tests.py
 I have included the script `run.sh` specifically to allow me to run the integration tests with the Java implementation.
