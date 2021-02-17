@@ -46,10 +46,10 @@ class FileError : public std::exception {};
  *   trust myself to write correct code with moves. 
  *   This also rules out storing the value of the object itself, as opposed to a pointer.
  *   That wouldn't work because copy assignment is not allowed for streams; it doesn't 
- *   make sense to copy them. It also wouldn't work because I want covariance; I need to
+ *   make sense to copy them. It also wouldn't work because I want polymorphism; I need to
  *   be able to store a pointer to the parent class (std::istream and std::ostream).
- * 
- * 
+ *
+ *
  *   There's one other issue: std::istream and std::ostream use signed char in the
  *   type parameter by default. This is annoying, because I use unsigned chars everywhere,
  *   but it's necessary because std::cin and std::cout are parameterized on signed chars.

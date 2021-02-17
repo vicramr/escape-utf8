@@ -35,7 +35,6 @@ install:
 # Note: was having issues with cmd not properly passing the quoted variable
 # to cmake, so I switched to powershell. Judging from googletest's appveyor.yml,
 # it seems that this should work: https://github.com/google/googletest/blob/master/appveyor.yml
-# -Vicram
 build_script:
   - ps: md build
   - ps: cd build
