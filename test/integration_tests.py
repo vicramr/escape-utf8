@@ -248,6 +248,15 @@ if __name__ == "__main__":
             boundary_success1_data = f.read()
             assert boundary_success1_data == out
 
+    # bom: file with the BOM character at the start
+    bom = os.path.join(absolute_path_to_vcs_testcases, "bom")
+    out = b"\\u'FEFF'This file begins with a BOM\\u'203D'"
+    with Popen([absolute_path_to_executable, bom], stdout=PIPE, stderr=PIPE, universal_newlines=False) as proc:
+        (stdout_data, stderr_data) = proc.communicate()
+        assert proc.returncode == 0
+        assert stdout_data == out
+        assert stderr_data == b""
+
 
     # Nonexistent input file (note, we're opening the streams in text mode here!)
     with Popen([absolute_path_to_executable, "NonExistentFileName"], stdout=PIPE, stderr=PIPE, universal_newlines=True) as proc:
