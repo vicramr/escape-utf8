@@ -41,5 +41,3 @@ TEST_CASE("Test check_output_option", "[check_output_option]") {
     REQUIRE(check_output_option("-\no") == -1);
     REQUIRE(check_output_option("foo") == -1);
 }
-
-// TODO write integration tests for parse/parse_helper

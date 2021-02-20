@@ -16,16 +16,6 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       GENERATOR: "Visual Studio 16 2019"
       USING_JAVA: "yes"
-#    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
-#      GENERATOR: "MinGW Makefiles"
-#    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-#      GENERATOR: "MinGW Makefiles"
-
-# TODO: get MinGW (and potentially MSYS) builds to pass
-#    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-#      GENERATOR: "MinGW Makefiles"
-#    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-#      GENERATOR: "MSYS Makefiles"
 
 # The set PATH line is modified from here: https://github.com/appveyor/ci/issues/1426
 install:
