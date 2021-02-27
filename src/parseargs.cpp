@@ -186,7 +186,7 @@ std::bitset<3> parse_helper(int argc, char **argv, std::string& inputfile, std::
         bits.set(2); // Return "valid"
         return bits;
     } else if (argc == 3) {
-        // There are two valid possibilities: either just -o/--option OUTPUTFILE was given,
+        // There are two valid possibilities: either just -o/--output OUTPUTFILE was given,
         // or both INPUTFILE and OUTPUTFILE were given but using the -oOUTPUTFILE
         // or --output=OUTPUTFILE syntax.
         int i = check_output_option(argv[1]);
@@ -206,7 +206,8 @@ std::bitset<3> parse_helper(int argc, char **argv, std::string& inputfile, std::
         }
         // Otherwise we couldn't parse the first arg so we'll see if
         // the second arg is the OUTPUTFILE option.
-        // TODO should we throw an error for "--output=" here?
+        // Note: if the first arg was "--output=" and the second arg turns out to have a valid output
+        // argument (such as "-ofilename") then "--output=" will be treated as the input filename.
         int j = check_output_option(argv[2]);
         if (j >= 2) { // This means argv[2] has the OUTPUTFILE option and argv[1] is INPUTFILE.
             assert(j==2 || j==9);
@@ -239,7 +240,7 @@ std::bitset<3> parse_helper(int argc, char **argv, std::string& inputfile, std::
             bits.set(2);
             return bits;
         }
-        // TODO should we throw an error for things like "-o" with no corresponding argument, or just accept that as INPUTFILE?
+        // Note: for an output option with no corresponding argument, we treat the option itself as the input filename
         inputfile.assign(argv[1]);
         bits.set(2);
         return bits;
