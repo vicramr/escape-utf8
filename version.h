@@ -10,8 +10,8 @@
  * See this SO question: https://stackoverflow.com/q/27395120
  */
 
-#define MAJOR (0)
+#define MAJOR (1)
 #define MINOR (0)
-#define PATCH (2)
+#define PATCH (0)
 
 #endif //ESCAPE_UTF8_VERSION_H
