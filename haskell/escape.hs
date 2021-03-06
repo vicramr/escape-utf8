@@ -36,13 +36,13 @@ parseArgs argv =
             | otherwise -> if (length nonOptions > 1)
                 then (putStrLn "Error: too many arguments" >> putStrLn (GetOpt.usageInfo "TODO" optionDescriptions) >> return (Left False))
                 else case (flags, nonOptions) of  -- This is the success case where we continue with the program.
-                ((OutputFile outfile):_, [infile]) -> return (Right (Just infile, Just outfile))  -- We just take the first output file given
-                ((OutputFile outfile):_, []) -> return (Right (Nothing, Just outfile))
-                ([], [infile]) -> return (Right (Just infile, Nothing))
-                _ -> assert ((length flags == 0) && (length nonOptions == 0)) (return (Right (Nothing, Nothing)))
+                    ((OutputFile outfile):_, [infile]) -> return (Right (Just infile, Just outfile))  -- We just take the first output file given
+                    ((OutputFile outfile):_, []) -> return (Right (Nothing, Just outfile))
+                    ([], [infile]) -> return (Right (Just infile, Nothing))
+                    _ -> assert ((length flags == 0) && (length nonOptions == 0)) (return (Right (Nothing, Nothing)))
         -- handleBadCmdline takes in a list of strings of error messages and prints them
         handleBadCmdline :: [String] -> IO (Either Bool (Maybe String, Maybe String))
-        handleBadCmdline errors = (foldl (\acc msg -> acc >> (putStr msg)) (putStrLn "Error: invalid usage") errors) >> return (Left False)
+        handleBadCmdline errors = (foldl (\acc msg -> acc >> (putStr msg)) (putStrLn "Error: invalid usage") errors) >> return (Left False) -- TODO print usage string
     in case triple of
         (flags, nonOptions, []) -> handleGoodCmdline flags nonOptions
         (_, _, errors) -> handleBadCmdline errors
