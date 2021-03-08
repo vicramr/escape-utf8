@@ -3,8 +3,9 @@ module Main where
 import Control.Exception (assert)
 import System.Environment (getArgs)
 import qualified System.Console.GetOpt as GetOpt
-import Control.Monad ((>>), foldM)
+import Control.Monad ((>>), foldM, (>>=))
 import qualified System.IO
+import System.IO.Error (tryIOError)
 import Data.Char (ord, chr)
 import Data.Bits ((.&.), (.|.), shiftL)
 import Text.Printf (hPrintf)
@@ -79,7 +80,8 @@ makeByte i = Byte (assert (0 <= i && i <= 255) i)
 -- businessLogic takes in the input and output handles and does the actual
 -- heavy lifting: it reads data from input, escapes it, and writes to output.
 -- If this succeeds then businessLogic returns True. If there is some error
--- (e.g. a malformed file or an IOError) then businessLogic returns False.
+-- (e.g. a malformed file or an IOError) then businessLogic prints an error
+-- message and returns False.
 -- This function catches all IOErrors.
 -- This function is not responsible for closing file handles.
 businessLogic :: System.IO.Handle -> System.IO.Handle -> IO Bool
@@ -90,7 +92,7 @@ businessLogic inHnd outHnd = let
     -- it if necessary. This may throw an IOError.
     printCodepoint :: Int -> IO ()
     printCodepoint c = if (32 <= c && c <= 126) || c == 9 || c == 10 || c == 13
-        then hPutChar outHnd (chr c)  -- Printable ASCII
+        then System.IO.hPutChar outHnd (chr c)  -- Printable ASCII
         else hPrintf outHnd "\\u'%04X'" c
 
 
@@ -123,11 +125,6 @@ businessLogic inHnd outHnd = let
         4 -> 0x10000 <= decodedChar && decodedChar <= 0x10FFFF
         _ -> error "Internal error: invalid charLen given to inRange"
 
-    -- readAndEscape takes in the contents of the input stream.
-    -- It returns either an error message or the final State.
-    -- This may throw an IOError due to writing to outHnd.
-    readAndEscape :: String -> IO (Either String State)
-    readAndEscape chars = foldM transition (Right Start) (map (makeByte . ord) chars)
     -- transition moves the state machine to the next state and potentially
     -- outputs some characters to outHnd
     transition :: Either String State -> Byte -> IO (Either String State)
@@ -150,8 +147,25 @@ businessLogic inHnd outHnd = let
                     else return (Left malformedMsg)
                 | otherwise -> assert (newNumRead < charLen) (return (Right (Middle newNumRead newDecodedChar charLen)))
         _ -> error "Internal error: didn't match a pattern in transition"
-  in
-    error "TODO"
+
+    -- readAndEscape takes in the contents of the input stream.
+    -- It returns either an error message or the final State.
+    -- readAndEscape catches any IOErrors due to writing to outHnd
+    -- and instead returns Left "errormsg".
+    readAndEscape :: String -> IO (Either String State)
+    readAndEscape chars = do
+        tryResult <- tryIOError (foldM transition (Right Start) (map (makeByte . ord) chars))
+        return (case tryResult of
+            Right result -> result
+            _ -> Left "There was a fatal error when trying to write the output.")
+  in do
+    -- hGetContents can throw an IOError
+    tryResult <- tryIOError (System.IO.hGetContents inHnd >>= readAndEscape)
+    case tryResult of
+        Right (Right Start) -> return True
+        Right (Right (Middle _ _ _)) -> (System.IO.hPutStrLn System.IO.stderr malformedMsg) >> return False
+        Right (Left errorMsg) -> (System.IO.hPutStrLn System.IO.stderr errorMsg) >> return False
+        _ -> (System.IO.hPutStrLn System.IO.stderr "There was an error when reading input.") >> return False
 
 -- END BUSINESS LOGIC
 
