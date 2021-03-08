@@ -5,6 +5,7 @@ import System.Environment (getArgs)
 import qualified System.Console.GetOpt as GetOpt
 import Control.Monad ((>>), foldM, (>>=))
 import qualified System.IO
+import System.IO (hPutStrLn, hPutStr, stderr)
 import System.IO.Error (tryIOError)
 import Data.Char (ord, chr)
 import Data.Bits ((.&.), (.|.), shiftL)
@@ -39,7 +40,7 @@ parseArgs argv =
             | (any (== Help) flags) -> putStrLn (GetOpt.usageInfo "TODO" optionDescriptions) >> return (Left True)
             | (any (== Version) flags) -> putStrLn ("escape-utf8 version " ++ version) >> return (Left True)
             | otherwise -> if (length nonOptions > 1)
-                then (putStrLn "Error: too many arguments" >> putStrLn (GetOpt.usageInfo "TODO" optionDescriptions) >> return (Left False))
+                then (hPutStrLn stderr "Error: too many arguments. Use the --help option for usage instructions." >> return (Left False))
                 else case (flags, nonOptions) of  -- This is the success case where we continue with the program.
                     ((OutputFile outfile):_, [infile]) -> return (Right (Just infile, Just outfile))  -- We just take the first output file given
                     ((OutputFile outfile):_, []) -> return (Right (Nothing, Just outfile))
@@ -47,7 +48,7 @@ parseArgs argv =
                     _ -> assert ((length flags == 0) && (length nonOptions == 0)) (return (Right (Nothing, Nothing)))
         -- handleBadCmdline takes in a list of strings of error messages and prints them
         handleBadCmdline :: [String] -> IO (Either Bool (Maybe String, Maybe String))
-        handleBadCmdline errors = (foldl (\acc msg -> acc >> (putStr msg)) (putStrLn "Error: invalid usage") errors) >> return (Left False) -- TODO print usage string
+        handleBadCmdline errors = (foldl (\acc msg -> acc >> (hPutStr stderr msg)) (hPutStrLn stderr "Error: invalid usage. Use the --help option for usage instructions.") errors) >> return (Left False)
     in case triple of
         (flags, nonOptions, []) -> handleGoodCmdline flags nonOptions
         (_, _, errors) -> handleBadCmdline errors
@@ -163,9 +164,9 @@ businessLogic inHnd outHnd = let
     tryResult <- tryIOError (System.IO.hGetContents inHnd >>= readAndEscape)
     case tryResult of
         Right (Right Start) -> return True
-        Right (Right (Middle _ _ _)) -> (System.IO.hPutStrLn System.IO.stderr malformedMsg) >> return False
-        Right (Left errorMsg) -> (System.IO.hPutStrLn System.IO.stderr errorMsg) >> return False
-        _ -> (System.IO.hPutStrLn System.IO.stderr "There was an error when reading input.") >> return False
+        Right (Right (Middle _ _ _)) -> (hPutStrLn stderr malformedMsg) >> return False
+        Right (Left errorMsg) -> (hPutStrLn stderr errorMsg) >> return False
+        _ -> (hPutStrLn stderr "There was an error when reading input.") >> return False
 
 -- END BUSINESS LOGIC
 
