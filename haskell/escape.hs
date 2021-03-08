@@ -3,7 +3,11 @@ module Main where
 import Control.Exception (assert)
 import System.Environment (getArgs)
 import qualified System.Console.GetOpt as GetOpt
-import Control.Monad ((>>))
+import Control.Monad ((>>), foldM)
+import qualified System.IO
+import Data.Char (ord, chr)
+import Data.Bits ((.&.), (.|.), shiftL)
+import Text.Printf (hPrintf)
 
 -- BEGIN COMMAND-LINE-HANDLING STUFF
 version = "x.y.z"
@@ -29,7 +33,7 @@ parseArgs argv =
     let triple = GetOpt.getOpt GetOpt.Permute optionDescriptions argv
         -- handleGoodCmdline handles the args in the case of no parse error
         handleGoodCmdline :: [Flag] -> [String] -> IO (Either Bool (Maybe String, Maybe String))
-        handleGoodCmdline flags nonOptions = case flags of
+        handleGoodCmdline flags nonOptions = case () of
           _  -- Here we are using a case expression with guards
             | (any (== Help) flags) -> putStrLn (GetOpt.usageInfo "TODO" optionDescriptions) >> return (Left True)
             | (any (== Version) flags) -> putStrLn ("escape-utf8 version " ++ version) >> return (Left True)
@@ -48,6 +52,108 @@ parseArgs argv =
         (_, _, errors) -> handleBadCmdline errors
         _ -> error "Internal error: getOpt did not return a triple"
 -- END COMMAND-LINE-HANDLING STUFF
+
+
+-- getHandles takes the input filename and output filename as input and attempts
+-- to open both files. If there is an error, this function prints an error message
+-- and returns Nothing. Otherwise this function returns (Just inputhandle, Just outputhandle).
+getHandles :: (Maybe String, Maybe String) -> IO (Maybe (System.IO.Handle, System.IO.Handle))
+getHandles (maybeIn, maybeOut) = undefined --TODO
+
+
+-- BEGIN BUSINESS LOGIC
+
+-- The State type holds the current state we're in as we're parsing the input stream.
+-- We can have 0, 1, 2, or 3 bytes in the buffer. 0 means we are at the start
+-- of a new Unicode character, otherwise we are in the middle of reading one.
+-- If there is at least one byte in the buffer then we must store:
+-- a) the number of bytes read so far, b) the decoded char so far, and
+-- c) the number of bytes in this character, as determined from the first byte.
+data State = Start | Middle Int Int Int
+
+-- Byte is just a wrapper for an Int that ensure it is in the valid range
+data Byte = Byte Int
+makeByte :: Int -> Byte
+makeByte i = Byte (assert (0 <= i && i <= 255) i)
+
+-- businessLogic takes in the input and output handles and does the actual
+-- heavy lifting: it reads data from input, escapes it, and writes to output.
+-- If this succeeds then businessLogic returns True. If there is some error
+-- (e.g. a malformed file or an IOError) then businessLogic returns False.
+-- This function catches all IOErrors.
+-- This function is not responsible for closing file handles.
+businessLogic :: System.IO.Handle -> System.IO.Handle -> IO Bool
+businessLogic inHnd outHnd = let
+    malformedMsg = "The given text is not valid UTF-8 text. Exiting now."
+
+    -- printCodepoint prints a decoded codepoint to outHnd, escaping
+    -- it if necessary. This may throw an IOError.
+    printCodepoint :: Int -> IO ()
+    printCodepoint c = if (32 <= c && c <= 126) || c == 9 || c == 10 || c == 13
+        then hPutChar outHnd (chr c)  -- Printable ASCII
+        else hPrintf outHnd "\\u'%04X'" c
+
+
+    -- Given the first byte of a multibyte character, return the number of bytes, or Nothing if the byte is malformed
+    getLen :: Byte -> Maybe Int
+    getLen (Byte b) = case () of
+      _
+        | b .&. 0xE0 == 0xC0 -> Just 2
+        | b .&. 0xF0 == 0xE0 -> Just 3
+        | b .&. 0xF8 == 0xF0 -> Just 4
+        | otherwise -> Nothing
+
+    -- Given the first byte in a multi-byte char, mask out the irrelevant bits
+    maskFirstByte :: Byte -> Int
+    maskFirstByte (Byte b) = case getLen (Byte b) of
+        Just 2 -> b .&. 0x1F
+        Just 3 -> b .&. 0x0F
+        Just 4 -> b .&. 0x07
+        _ -> error "Internal error: invalid byte given to maskFirstByte"
+    -- Given byte 2/3/4 (i.e. an internal byte in the character), return whether it starts with bits 10.
+    isValidInternal :: Byte -> Bool
+    isValidInternal (Byte b) = (b .&. 0xC0) == 0x80
+
+    -- Given a codepoint (decodedChar) and the number of bytes in the character,
+    -- return whether the codepoint is in the valid range.
+    inRange :: Int -> Int -> Bool -- (codepoint, len) if it's valid in the range
+    inRange decodedChar charLen = case charLen of
+        2 -> 0x80 <= decodedChar && decodedChar <= 0x7FF
+        3 -> 0x800 <= decodedChar && decodedChar <= 0xFFFF
+        4 -> 0x10000 <= decodedChar && decodedChar <= 0x10FFFF
+        _ -> error "Internal error: invalid charLen given to inRange"
+
+    -- readAndEscape takes in the contents of the input stream.
+    -- It returns either an error message or the final State.
+    -- This may throw an IOError due to writing to outHnd.
+    readAndEscape :: String -> IO (Either String State)
+    readAndEscape chars = foldM transition (Right Start) (map (makeByte . ord) chars)
+    -- transition moves the state machine to the next state and potentially
+    -- outputs some characters to outHnd
+    transition :: Either String State -> Byte -> IO (Either String State)
+    transition x (Byte b) = case x of
+        Left s -> return (Left s)
+        Right Start -> if (b <= 127)
+            then printCodepoint b >> return (Right Start)
+            else case (getLen (makeByte b)) of
+                (Just len) -> return (Right (Middle 1 (maskFirstByte (makeByte b)) len))
+                _ -> return (Left malformedMsg)
+        Right (Middle numRead decodedChar charLen) -> let
+            newDecodedChar = (shiftL decodedChar 6) .|. (b .&. 0x63)
+            newNumRead = numRead + 1
+          in
+            case () of
+              _ -- Using case statement with guards to emulate a multiway if-else
+                | not (isValidInternal (makeByte b)) -> return (Left malformedMsg)
+                | newNumRead == charLen -> if (inRange newDecodedChar charLen)
+                    then printCodepoint newDecodedChar >> return (Right Start)
+                    else return (Left malformedMsg)
+                | otherwise -> assert (newNumRead < charLen) (return (Right (Middle newNumRead newDecodedChar charLen)))
+        _ -> error "Internal error: didn't match a pattern in transition"
+  in
+    error "TODO"
+
+-- END BUSINESS LOGIC
 
 
 main :: IO ()
