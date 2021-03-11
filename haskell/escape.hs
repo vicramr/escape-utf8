@@ -9,7 +9,7 @@ import System.IO (hPutStrLn, hPutStr, stderr)
 import System.IO.Error (tryIOError)
 import Data.Char (ord, chr)
 import Data.Bits ((.&.), (.|.), shiftL)
-import Text.Printf (hPrintf)
+import Text.Printf (printf, hPrintf)
 
 -- BEGIN COMMAND-LINE-HANDLING STUFF
 version = "x.y.z"
@@ -58,9 +58,35 @@ parseArgs argv =
 
 -- getHandles takes the input filename and output filename as input and attempts
 -- to open both files. If there is an error, this function prints an error message
--- and returns Nothing. Otherwise this function returns (Just inputhandle, Just outputhandle).
+-- and returns Nothing. Otherwise this function returns Just (inputhandle, outputhandle).
 getHandles :: (Maybe String, Maybe String) -> IO (Maybe (System.IO.Handle, System.IO.Handle))
-getHandles (maybeIn, maybeOut) = undefined --TODO
+getHandles (maybeIn, maybeOut) = let
+    -- stdHnd is either stdin or stdout
+    -- fstring is a string for printf that should have a single %s for the filename
+    -- mode is the IOMode that would be used for opening the file
+    -- maybeFilename is either maybeIn or maybeOut
+    -- Returns either an error message or a ready-to-use handle
+    attemptSetup :: System.IO.Handle -> String -> System.IO.IOMode -> Maybe String -> IO (Either String System.IO.Handle)
+    attemptSetup stdHnd fstring mode maybeFilename = case maybeFilename of
+        Just filename -> do
+            tryResult <- tryIOError (System.IO.openBinaryFile filename mode)
+            case tryResult of
+                Right hnd -> return (Right hnd)
+                _ -> return (Left (printf fstring filename))
+        _ -> do
+            tryResult <- tryIOError (System.IO.hSetBinaryMode stdHnd True)
+            case tryResult of
+                Right _ -> return (Right stdHnd)
+                _ -> return (Left "Error when setting stdin or stdout to binary mode")
+  in do
+    -- TODO is there a better way to structure this?
+    inHndOrError <- attemptSetup System.IO.stdin "Failed to open input file \"%s\". Exiting now." System.IO.ReadMode maybeIn
+    outHndOrError <- attemptSetup System.IO.stdout "Failed to open output file \"%s\". Exiting now." System.IO.WriteMode maybeOut
+    case inHndOrError of
+        Left errMsg -> hPutStrLn stderr errMsg >> return Nothing
+        Right inHnd -> case outHndOrError of -- Reason for structuring it like this: so that the output file isn't created if we have an error in input
+            Left errMsg -> hPutStrLn stderr errMsg >> return Nothing
+            Right outHnd -> return (Just (inHnd, outHnd))
 
 
 -- BEGIN BUSINESS LOGIC
