@@ -1,6 +1,6 @@
 module Main where
 
-import Control.Exception (assert)
+import Control.Exception (assert, finally)
 import System.Environment (getArgs)
 import qualified System.Console.GetOpt as GetOpt
 import Control.Monad ((>>), foldM, (>>=))
@@ -10,6 +10,7 @@ import System.IO.Error (tryIOError)
 import Data.Char (ord, chr)
 import Data.Bits ((.&.), (.|.), shiftL)
 import Text.Printf (printf, hPrintf)
+import qualified System.Exit
 
 -- BEGIN COMMAND-LINE-HANDLING STUFF
 version = "x.y.z"
@@ -59,8 +60,8 @@ parseArgs argv =
 -- getHandles takes the input filename and output filename as input and attempts
 -- to open both files. If there is an error, this function prints an error message
 -- and returns Nothing. Otherwise this function returns Just (inputhandle, outputhandle).
-getHandles :: (Maybe String, Maybe String) -> IO (Maybe (System.IO.Handle, System.IO.Handle))
-getHandles (maybeIn, maybeOut) = let
+getHandles :: Maybe String -> Maybe String -> IO (Maybe (System.IO.Handle, System.IO.Handle))
+getHandles maybeIn maybeOut = let
     -- stdHnd is either stdin or stdout
     -- fstring is a string for printf that should have a single %s for the filename
     -- mode is the IOMode that would be used for opening the file
@@ -202,7 +203,13 @@ main = do
     argv <- getArgs
     boolOrPair <- parseArgs argv
     case boolOrPair of
-        Left True -> putStrLn "Exiting with success"
-        Left False -> putStrLn "Exiting with failure"
-        Right (maybein, maybeout) -> putStrLn (show maybein ++ " " ++ show maybeout)
+        Left True -> System.Exit.exitSuccess
+        Left False -> System.Exit.exitFailure
+        Right (maybeIn, maybeOut) -> do
+            maybeHandles <- getHandles maybeIn maybeOut
+            case maybeHandles of
+                Nothing -> System.Exit.exitFailure
+                Just (inHnd, outHnd) -> do
+                    isSuccess <- finally (businessLogic inHnd outHnd) (System.IO.hClose inHnd >> System.IO.hClose outHnd)
+                    if isSuccess then System.Exit.exitSuccess else System.Exit.exitFailure
 
