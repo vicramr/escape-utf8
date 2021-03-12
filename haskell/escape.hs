@@ -1,16 +1,17 @@
 module Main where
 
+import Data.Bits ((.&.), (.|.), shiftL)
+import Data.Char (ord, chr)
 import Control.Exception (assert, finally)
-import System.Environment (getArgs)
-import qualified System.Console.GetOpt as GetOpt
 import Control.Monad ((>>), foldM, (>>=))
+import qualified System.Console.GetOpt as GetOpt
+import System.Environment (getArgs)
+import qualified System.Exit
 import qualified System.IO
 import System.IO (hPutStrLn, hPutStr, stderr)
 import System.IO.Error (tryIOError)
-import Data.Char (ord, chr)
-import Data.Bits ((.&.), (.|.), shiftL)
 import Text.Printf (printf, hPrintf)
-import qualified System.Exit
+
 
 -- BEGIN COMMAND-LINE-HANDLING STUFF
 version = "1.0.0"
