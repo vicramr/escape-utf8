@@ -13,7 +13,7 @@ import Text.Printf (printf, hPrintf)
 import qualified System.Exit
 
 -- BEGIN COMMAND-LINE-HANDLING STUFF
-version = "x.y.z"
+version = "1.0.0"
 
 -- Which flag the user has given
 data Flag = Help | Version | OutputFile String deriving (Eq)
@@ -164,7 +164,7 @@ businessLogic inHnd outHnd = let
                 (Just len) -> return (Right (Middle 1 (maskFirstByte (makeByte b)) len))
                 _ -> return (Left malformedMsg)
         Right (Middle numRead decodedChar charLen) -> let
-            newDecodedChar = (shiftL decodedChar 6) .|. (b .&. 0x63)
+            newDecodedChar = (shiftL decodedChar 6) .|. (b .&. 0x3F)
             newNumRead = numRead + 1
           in
             case () of
@@ -212,4 +212,3 @@ main = do
                 Just (inHnd, outHnd) -> do
                     isSuccess <- finally (businessLogic inHnd outHnd) (System.IO.hClose inHnd >> System.IO.hClose outHnd)
                     if isSuccess then System.Exit.exitSuccess else System.Exit.exitFailure
-
