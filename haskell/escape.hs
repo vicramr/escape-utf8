@@ -14,6 +14,7 @@ import Text.Printf (printf, hPrintf)
 
 
 -- BEGIN COMMAND-LINE-HANDLING STUFF
+version :: String
 version = "1.0.0"
 
 -- Which flag the user has given
@@ -54,7 +55,6 @@ parseArgs argv =
     in case triple of
         (flags, nonOptions, []) -> handleGoodCmdline flags nonOptions
         (_, _, errors) -> handleBadCmdline errors
-        _ -> error "Internal error: getOpt did not return a triple"
 -- END COMMAND-LINE-HANDLING STUFF
 
 
@@ -175,7 +175,6 @@ businessLogic inHnd outHnd = let
                     then printCodepoint newDecodedChar >> return (Right Start)
                     else return (Left malformedMsg)
                 | otherwise -> assert (newNumRead < charLen) (return (Right (Middle newNumRead newDecodedChar charLen)))
-        _ -> error "Internal error: didn't match a pattern in transition"
 
     -- readAndEscape takes in the contents of the input stream.
     -- It returns either an error message or the final State.
