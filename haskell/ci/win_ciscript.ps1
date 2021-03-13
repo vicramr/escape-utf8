@@ -1,10 +1,11 @@
 # This script is intended to be used by AppVeyor.
-# The working directory is assumed to be the repo's root directory.
 # Note: to exit upon an error, we need to actually check the exit code.
 # https://stackoverflow.com/a/9949909
 
 echo "GHC version:"
 ghc --version
+
+cd $env:APPVEYOR_BUILD_FOLDER\haskell
 
 echo "Now running ghc"
 ghc -Wall escape.hs
