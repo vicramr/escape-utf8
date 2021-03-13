@@ -82,11 +82,12 @@ getHandles maybeIn maybeOut = let
                 _ -> return (Left "Error when setting stdin or stdout to binary mode")
   in do
     -- TODO is there a better way to structure this?
+    -- Also, right now, output file is still created even if input file fails to open
     inHndOrError <- attemptSetup System.IO.stdin "Failed to open input file \"%s\". Exiting now." System.IO.ReadMode maybeIn
     outHndOrError <- attemptSetup System.IO.stdout "Failed to open output file \"%s\". Exiting now." System.IO.WriteMode maybeOut
     case inHndOrError of
         Left errMsg -> hPutStrLn stderr errMsg >> return Nothing
-        Right inHnd -> case outHndOrError of -- Reason for structuring it like this: so that the output file isn't created if we have an error in input
+        Right inHnd -> case outHndOrError of
             Left errMsg -> hPutStrLn stderr errMsg >> return Nothing
             Right outHnd -> return (Just (inHnd, outHnd))
 
