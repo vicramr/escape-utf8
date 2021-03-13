@@ -17,6 +17,17 @@ import Text.Printf (printf, hPrintf)
 version :: String
 version = "1.0.0"
 
+helpStr :: String
+helpStr = "escape-utf8: Transform UTF-8 text to a representation in ASCII.\n\
+          \For detailed information please see the README.\n\n\
+          \usage:\n\
+          \  escape [INPUTFILE] [-o OUTPUTFILE]\n\
+          \  escape -h | --help\n\
+          \  escape -v | --version\n\n\
+          \argument:\n\
+          \  INPUTFILE: Path to the input file. If omitted, input will be read from stdin.\n\n\
+          \options:"
+
 -- Which flag the user has given
 data Flag = Help | Version | OutputFile String deriving (Eq)
 
@@ -40,7 +51,7 @@ parseArgs argv =
         handleGoodCmdline :: [Flag] -> [String] -> IO (Either Bool (Maybe String, Maybe String))
         handleGoodCmdline flags nonOptions = case () of
           _  -- Here we are using a case expression with guards
-            | (any (== Help) flags) -> putStrLn (GetOpt.usageInfo "TODO" optionDescriptions) >> return (Left True)
+            | (any (== Help) flags) -> putStr (GetOpt.usageInfo helpStr optionDescriptions) >> return (Left True)
             | (any (== Version) flags) -> putStrLn ("escape-utf8 version " ++ version) >> return (Left True)
             | otherwise -> if (length nonOptions > 1)
                 then (hPutStrLn stderr "Error: too many arguments. Use the --help option for usage instructions." >> return (Left False))
