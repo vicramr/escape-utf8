@@ -16,11 +16,13 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       GENERATOR: "Visual Studio 16 2019"
       USING_JAVA: "yes"
+      USING_HASKELL: "yes"
 
 # The set PATH line is modified from here: https://github.com/appveyor/ci/issues/1426
 install:
   - git submodule update --init --recursive
   - set PATH=C:\Program Files\Java\jdk1.8.0\bin;%PATH%
+  - ps: if ($env:USING_HASKELL -eq "yes") {choco install ghc} else {echo "Not installing Haskell."}
 
 # Note: was having issues with cmd not properly passing the quoted variable
 # to cmake, so I switched to powershell. Judging from googletest's appveyor.yml,
@@ -39,5 +41,6 @@ test_script:
   - ps: C:\Python35-x64\python.exe ..\test\integration_tests.py .\Release\escape.exe
   - ps: cd ..
   - ps: if ($env:USING_JAVA -eq "yes") {.\java\ci\win_ciscript.ps1} else {echo "Not running Java tests."}
+  - ps: if ($env:USING_HASKELL -eq "yes") {.\haskell\ci\win_ciscript.ps1} else {echo "Not running Haskell tests."}
 # Preinstalled Python locations are listed here:
 # https://www.appveyor.com/docs/windows-images-software/#python
