@@ -22,8 +22,7 @@ environment:
 install:
   - git submodule update --init --recursive
   - set PATH=C:\Program Files\Java\jdk1.8.0\bin;%PATH%
-  - ps: if ($env:USING_HASKELL -eq "yes") {choco install ghc} else {echo "Not installing Haskell."}
-  - ps: refreshenv
+  - ps: if ($env:USING_HASKELL -eq "yes") {choco install ghc --version=9.0.1} else {echo "Not installing Haskell."}
 
 # Note: was having issues with cmd not properly passing the quoted variable
 # to cmake, so I switched to powershell. Judging from googletest's appveyor.yml,

@@ -3,12 +3,12 @@
 # https://stackoverflow.com/a/9949909
 
 echo "GHC version:"
-ghc --version
+C:\tools\ghc-9.0.1\bin\ghc.exe --version
 
 cd $env:APPVEYOR_BUILD_FOLDER\haskell
 
 echo "Now running ghc"
-ghc -Wall escape.hs
+C:\tools\ghc-9.0.1\bin\ghc.exe -Wall escape.hs
 if ($LastExitCode -ne 0) {
     echo "Error: GHC failed"
     exit 1
