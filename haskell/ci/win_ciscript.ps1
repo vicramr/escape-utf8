@@ -11,7 +11,7 @@ echo "Now running ghc"
 ghc -Wall escape.hs
 if ($LastExitCode -ne 0) {
     echo "Error: GHC failed"
-    exit $LastExitCode
+    exit 1
 }
 
 echo "Now running integration tests"
