@@ -139,7 +139,7 @@ getHandles maybeIn maybeOut =
         case tryResult of
           Right hnd -> return (Right hnd)
           _         -> return (Left (printf fstring filename))
-      _ -> do
+      Nothing -> do
         tryResult <- tryIOError (System.IO.hSetBinaryMode stdHnd True)
         case tryResult of
           Right _ -> return (Right stdHnd)
