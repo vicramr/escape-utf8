@@ -33,10 +33,10 @@ data Flag = Help | Version | OutputFile String deriving (Eq)
 
 -- Option descriptions
 optionDescriptions :: [GetOpt.OptDescr Flag]
-optionDescriptions = [(GetOpt.Option "h" ["help"] (GetOpt.NoArg Help) "Show this help message."),
-                      (GetOpt.Option "v" ["version"] (GetOpt.NoArg Version) "Show version."),
-                      (GetOpt.Option "o" ["output"] (GetOpt.ReqArg OutputFile "OUTPUTFILE") 
-                          "Path to the file to write output to. If this option is omitted, the output will be printed to stdout.")]
+optionDescriptions = [GetOpt.Option "h" ["help"] (GetOpt.NoArg Help) "Show this help message.",
+                      GetOpt.Option "v" ["version"] (GetOpt.NoArg Version) "Show version.",
+                      GetOpt.Option "o" ["output"] (GetOpt.ReqArg OutputFile "OUTPUTFILE")
+                          "Path to the file to write output to. If this option is omitted, the output will be printed to stdout."]
 
 -- parseArgs takes as input the command-line args and returns:
 --   Left True = exit now with a success exit code
@@ -51,18 +51,18 @@ parseArgs argv =
         handleGoodCmdline :: [Flag] -> [String] -> IO (Either Bool (Maybe String, Maybe String))
         handleGoodCmdline flags nonOptions = case () of
           _  -- Here we are using a case expression with guards
-            | (any (== Help) flags) -> putStr (GetOpt.usageInfo helpStr optionDescriptions) >> return (Left True)
-            | (any (== Version) flags) -> putStrLn ("escape-utf8 version " ++ version) >> return (Left True)
-            | otherwise -> if (length nonOptions > 1)
-                then (hPutStrLn stderr "Error: too many arguments. Use the --help option for usage instructions." >> return (Left False))
+            | elem Help flags -> putStr (GetOpt.usageInfo helpStr optionDescriptions) >> return (Left True)
+            | elem Version flags -> putStrLn ("escape-utf8 version " ++ version) >> return (Left True)
+            | otherwise -> if length nonOptions > 1
+                then hPutStrLn stderr "Error: too many arguments. Use the --help option for usage instructions." >> return (Left False)
                 else case (flags, nonOptions) of  -- This is the success case where we continue with the program.
                     ((OutputFile outfile):_, [infile]) -> return (Right (Just infile, Just outfile))  -- We just take the first output file given
                     ((OutputFile outfile):_, []) -> return (Right (Nothing, Just outfile))
                     ([], [infile]) -> return (Right (Just infile, Nothing))
-                    _ -> assert ((length flags == 0) && (length nonOptions == 0)) (return (Right (Nothing, Nothing)))
+                    _ -> assert ((null flags) && (null nonOptions)) (return (Right (Nothing, Nothing)))
         -- handleBadCmdline takes in a list of strings of error messages and prints them
         handleBadCmdline :: [String] -> IO (Either Bool (Maybe String, Maybe String))
-        handleBadCmdline errors = (foldl (\acc msg -> acc >> (hPutStr stderr msg)) (hPutStrLn stderr "Error: invalid usage. Use the --help option for usage instructions.") errors) >> return (Left False)
+        handleBadCmdline errors = foldl (\acc msg -> acc >> hPutStr stderr msg) (hPutStrLn stderr "Error: invalid usage. Use the --help option for usage instructions.") errors >> return (Left False)
     in case triple of
         (flags, nonOptions, []) -> handleGoodCmdline flags nonOptions
         (_, _, errors) -> handleBadCmdline errors
@@ -114,7 +114,7 @@ getHandles maybeIn maybeOut = let
 data State = Start | Middle Int Int Int
 
 -- Byte is just a wrapper for an Int that ensure it is in the valid range
-data Byte = Byte Int
+newtype Byte = Byte Int
 makeByte :: Int -> Byte
 makeByte i = Byte (assert (0 <= i && i <= 255) i)
 
@@ -171,9 +171,9 @@ businessLogic inHnd outHnd = let
     transition :: Either String State -> Byte -> IO (Either String State)
     transition x (Byte b) = case x of
         Left s -> return (Left s)
-        Right Start -> if (b <= 127)
+        Right Start -> if b <= 127
             then printCodepoint b >> return (Right Start)
-            else case (getLen (makeByte b)) of
+            else case getLen (makeByte b) of
                 (Just len) -> return (Right (Middle 1 (maskFirstByte (makeByte b)) len))
                 _ -> return (Left malformedMsg)
         Right (Middle numRead decodedChar charLen) -> let
@@ -183,7 +183,7 @@ businessLogic inHnd outHnd = let
             case () of
               _ -- Using case statement with guards to emulate a multiway if-else
                 | not (isValidInternal (makeByte b)) -> return (Left malformedMsg)
-                | newNumRead == charLen -> if (inRange newDecodedChar charLen)
+                | newNumRead == charLen -> if inRange newDecodedChar charLen
                     then printCodepoint newDecodedChar >> return (Right Start)
                     else return (Left malformedMsg)
                 | otherwise -> assert (newNumRead < charLen) (return (Right (Middle newNumRead newDecodedChar charLen)))
@@ -203,9 +203,9 @@ businessLogic inHnd outHnd = let
     tryResult <- tryIOError (System.IO.hGetContents inHnd >>= readAndEscape)
     case tryResult of
         Right (Right Start) -> return True
-        Right (Right (Middle _ _ _)) -> (hPutStrLn stderr malformedMsg) >> return False
-        Right (Left errorMsg) -> (hPutStrLn stderr errorMsg) >> return False
-        _ -> (hPutStrLn stderr "There was an error when reading input.") >> return False
+        Right (Right (Middle _ _ _)) -> hPutStrLn stderr malformedMsg >> return False
+        Right (Left errorMsg) -> hPutStrLn stderr errorMsg >> return False
+        _ -> hPutStrLn stderr "There was an error when reading input." >> return False
 
 -- END BUSINESS LOGIC
 
