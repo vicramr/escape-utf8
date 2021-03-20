@@ -60,7 +60,7 @@ parseArgs argv =
                     ((OutputFile outfile):_, [infile]) -> return (Right (Just infile, Just outfile))  -- We just take the first output file given
                     ((OutputFile outfile):_, []) -> return (Right (Nothing, Just outfile))
                     ([], [infile]) -> return (Right (Just infile, Nothing))
-                    _ -> assert ((null flags) && (null nonOptions)) (return (Right (Nothing, Nothing)))
+                    _ -> assert (null flags && null nonOptions) (return (Right (Nothing, Nothing)))
         -- handleBadCmdline takes in a list of strings of error messages and prints them
         handleBadCmdline :: [String] -> IO (Either Bool (Maybe String, Maybe String))
         handleBadCmdline errors = foldl' (\acc msg -> acc >> hPutStr stderr msg) (hPutStrLn stderr "Error: invalid usage. Use the --help option for usage instructions.") errors >> return (Left False)
