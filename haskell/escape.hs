@@ -2,6 +2,7 @@ module Main where
 
 import Data.Bits ((.&.), (.|.), shiftL)
 import Data.Char (ord, chr)
+import Data.List (foldl')
 import Control.Exception (assert, finally)
 import Control.Monad ((>>), foldM, (>>=))
 import qualified System.Console.GetOpt as GetOpt
@@ -29,7 +30,7 @@ helpStr = "escape-utf8: Transform UTF-8 text to a representation in ASCII.\n\
           \options:"
 
 -- Which flag the user has given
-data Flag = Help | Version | OutputFile String deriving (Eq)
+data Flag = Help | Version | OutputFile !String deriving (Eq)
 
 -- Option descriptions
 optionDescriptions :: [GetOpt.OptDescr Flag]
@@ -62,7 +63,7 @@ parseArgs argv =
                     _ -> assert ((null flags) && (null nonOptions)) (return (Right (Nothing, Nothing)))
         -- handleBadCmdline takes in a list of strings of error messages and prints them
         handleBadCmdline :: [String] -> IO (Either Bool (Maybe String, Maybe String))
-        handleBadCmdline errors = foldl (\acc msg -> acc >> hPutStr stderr msg) (hPutStrLn stderr "Error: invalid usage. Use the --help option for usage instructions.") errors >> return (Left False)
+        handleBadCmdline errors = foldl' (\acc msg -> acc >> hPutStr stderr msg) (hPutStrLn stderr "Error: invalid usage. Use the --help option for usage instructions.") errors >> return (Left False)
     in case triple of
         (flags, nonOptions, []) -> handleGoodCmdline flags nonOptions
         (_, _, errors) -> handleBadCmdline errors
@@ -111,7 +112,7 @@ getHandles maybeIn maybeOut = let
 -- If there is at least one byte in the buffer then we must store:
 -- a) the number of bytes read so far, b) the decoded char so far, and
 -- c) the number of bytes in this character, as determined from the first byte.
-data State = Start | Middle Int Int Int
+data State = Start | Middle !Int !Int !Int
 
 -- Byte is just a wrapper for an Int that ensure it is in the valid range
 newtype Byte = Byte Int
@@ -175,7 +176,7 @@ businessLogic inHnd outHnd = let
             then printCodepoint b >> return (Right Start)
             else case getLen (makeByte b) of
                 (Just len) -> return (Right (Middle 1 (maskFirstByte (makeByte b)) len))
-                _ -> return (Left malformedMsg)
+                Nothing -> return (Left malformedMsg)
         Right (Middle numRead decodedChar charLen) -> let
             newDecodedChar = (shiftL decodedChar 6) .|. (b .&. 0x3F)
             newNumRead = numRead + 1
